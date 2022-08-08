@@ -43,30 +43,32 @@ class RelayNodePeriodicSim:
         # create the arrival times to the relay node
         arrival_times = n * [0]
         for i in range(1, n):  # the first arrival is taken to happen at time 0
-            arrival_times[i] = arrival_times[i - 1] + Sim_math_ops.exp(avg_inter_arrival_time)  # exponential
-            # arrival_times[i] = arrival_times[i-1] + Sim_math_ops.const(avg_inter_arrival_time)   #constant
-        #         print(arrival_times)
+            #arrival_times[i] = arrival_times[i - 1] + Sim_math_ops.exp(avg_inter_arrival_time)  # exponential
+            arrival_times[i] = arrival_times[i-1] + Sim_math_ops.const(avg_inter_arrival_time)   #constant
+        print(arrival_times)
 
         # Create Periods of transfer (a maximum of the time the last arrival occured plus one period will be needed)
         last_arrival = arrival_times[n - 1]
         num_periods = 0
         if last_arrival % p == 0:
-            num_periods = last_arrival / p
+            num_periods = int(last_arrival / p)
         else:
             num_periods = math.floor(last_arrival / p) + 1
-        period_times = num_periods * [0]
+        period_times = num_periods*[0]
         for i in range(num_periods):
             period_times[i] = p * (i + 1)
-        #         print(period_times)
+        print(period_times)
 
-        # calculate exit times from relay node
+        # calculate exit times from relay node   ################ do double for loop to search for the period for each relay node arrival
         relay_node_exit_times = n * [0]
-        curr_period_idx = 0
-        for i in range(n):
-            if arrival_times[i] > period_times[curr_period_idx]:
-                curr_period_idx += 1
-            relay_node_exit_times[i] = period_times[curr_period_idx]
-        # print(relay_node_exit_times)
+        last_period_idx = 0
+        #Since arrival_times and period_times are sorted, we can use last_period_idx
+        for i in range(len(arrival_times)):
+            for j in range(last_period_idx, num_periods):
+                if arrival_times[i] <= period_times[j]:
+                    relay_node_exit_times[i] = period_times[j]
+                    break
+        print(relay_node_exit_times)
 
         # calculate relay node residence time
         relay_node_residence_times = n * [0]
@@ -76,8 +78,8 @@ class RelayNodePeriodicSim:
         # create server service times
         service_times = num_periods * [0]  # one service time for each batch data transfer
         for i in range(num_periods):
-            service_times[i] = Sim_math_ops.exp(avg_service_time)  # exponential
-            # service_times[i] = Sim_math_ops.const(avg_service_time)    #constant
+            #service_times[i] = Sim_math_ops.exp(avg_service_time)  # exponential
+            service_times[i] = Sim_math_ops.const(avg_service_time)    #constant
 
         # create batches as [[list of request indexes that are part of this batch],period,service_time,server_leave_time,server_queue_time]
         # we initialize the server_leave_time to zero
@@ -107,16 +109,13 @@ class RelayNodePeriodicSim:
         batches[0][3] = batches[0][1] + batches[0][2]  # the first batch exit time is its period + its service time
         for i in range(1, num_periods):
             if batches[i][1] > batches[i - 1][3]:  # if batch i period is more than the previous batch exit time
-                batches[i][3] = batches[i][1] + batches[i][
-                    2]  # no queuing, the exit time is the batch period + its service time
+                batches[i][3] = batches[i][1] + batches[i][2]  # no queuing, the exit time is the batch period + its service time
                 batches[i][4] = 0
             else:
-                batches[i][3] = batches[i - 1][3] + batches[i][
-                    2]  # batch has to wait until previous batch finishes execution, then has its service time.
-                batches[i][4] = batches[i - 1][3] - batches[i][
-                    1]  # batch queue time is previous batch finish time - current batch arrival (or period)
+                batches[i][3] = batches[i - 1][3] + batches[i][2]  # batch has to wait until previous batch finishes execution, then has its service time.
+                batches[i][4] = batches[i - 1][3] - batches[i][1]  # batch queue time is previous batch finish time - current batch arrival (or period)
 
-        # set each request's server exit times, queue times, and service tims
+        # set each request's server exit times, queue times, and service time
         server_exit_times = n * [0]
         server_queue_times = n * [0]
         server_service_times = n * [0]
@@ -158,10 +157,10 @@ class RelayNodePeriodicSim:
 
 
 # Script
-m = 100
-n = 1000
-p = 1000
-avg_inter_arrival_time = 50
+m = 1
+n = 10
+p = 100
+avg_inter_arrival_time = 200
 avg_service_time = 40
 isVerbose = True
 
