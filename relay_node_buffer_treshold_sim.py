@@ -135,8 +135,8 @@ class RelayNodeThresholdSim:
 
 m = 100  # repetition of experiments
 n = 10000
-t = 20
-mean_inter_arrival_time = 50
+t = 3
+mean_inter_arrival_time = 45
 # nter_arrival_times_distribution = "CONSTANT"
 inter_arrival_times_distribution = "EXPONENTIAL"
 mean_service_time = 40
@@ -161,10 +161,10 @@ for i in range(m):
     avg_server_residence_times[i] = metrics[4]
     avg_end_to_end_times[i] = metrics[5]
 
-print("metrics: ")
-print("average measured inter arrival time: " + str(Sim_math_ops.average(avg_measured_inter_arrival_times)))
-print("avg_relay_node_residence_times: " + str(Sim_math_ops.average(avg_relay_node_residence_times)))
-print("avg_server_queue_times: " + str(Sim_math_ops.average(avg_server_queue_times)))
-print("avg_measured_server_service_times: " + str(Sim_math_ops.average(avg_measured_server_service_times)))
-print("avg_server_residence_times: " + str(Sim_math_ops.average(avg_server_residence_times)))
+# print("metrics: ")
+# print("average measured inter arrival time: " + str(Sim_math_ops.average(avg_measured_inter_arrival_times)))
+# print("avg_relay_node_residence_times: " + str(Sim_math_ops.average(avg_relay_node_residence_times)))
+# print("avg_server_queue_times: " + str(Sim_math_ops.average(avg_server_queue_times)))
+# print("avg_measured_server_service_times: " + str(Sim_math_ops.average(avg_measured_server_service_times)))
+# print("avg_server_residence_times: " + str(Sim_math_ops.average(avg_server_residence_times)))
 print("avg_end_to_end_times: " + str(Sim_math_ops.average(avg_end_to_end_times)))

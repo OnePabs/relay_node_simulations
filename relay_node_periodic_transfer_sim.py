@@ -43,9 +43,9 @@ class RelayNodePeriodicSim:
         # create the arrival times to the relay node
         arrival_times = n * [0]
         for i in range(1, n):  # the first arrival is taken to happen at time 0
-            #arrival_times[i] = arrival_times[i - 1] + Sim_math_ops.exp(avg_inter_arrival_time)  # exponential
-            arrival_times[i] = arrival_times[i-1] + Sim_math_ops.const(avg_inter_arrival_time)   #constant
-        print(arrival_times)
+            arrival_times[i] = arrival_times[i - 1] + Sim_math_ops.exp(avg_inter_arrival_time)  # exponential
+            #arrival_times[i] = arrival_times[i-1] + Sim_math_ops.const(avg_inter_arrival_time)   #constant
+        #print(arrival_times)
 
         # Create Periods of transfer (a maximum of the time the last arrival occured plus one period will be needed)
         last_arrival = arrival_times[n - 1]
@@ -57,7 +57,7 @@ class RelayNodePeriodicSim:
         period_times = num_periods*[0]
         for i in range(num_periods):
             period_times[i] = p * (i + 1)
-        print(period_times)
+        #print(period_times)
 
         # calculate exit times from relay node   ################ do double for loop to search for the period for each relay node arrival
         relay_node_exit_times = n * [0]
@@ -68,7 +68,7 @@ class RelayNodePeriodicSim:
                 if arrival_times[i] <= period_times[j]:
                     relay_node_exit_times[i] = period_times[j]
                     break
-        print(relay_node_exit_times)
+        #print(relay_node_exit_times)
 
         # calculate relay node residence time
         relay_node_residence_times = n * [0]
@@ -78,8 +78,8 @@ class RelayNodePeriodicSim:
         # create server service times
         service_times = num_periods * [0]  # one service time for each batch data transfer
         for i in range(num_periods):
-            #service_times[i] = Sim_math_ops.exp(avg_service_time)  # exponential
-            service_times[i] = Sim_math_ops.const(avg_service_time)    #constant
+            service_times[i] = Sim_math_ops.exp(avg_service_time)  # exponential
+            #service_times[i] = Sim_math_ops.const(avg_service_time)    #constant
 
         # create batches as [[list of request indexes that are part of this batch],period,service_time,server_leave_time,server_queue_time]
         # we initialize the server_leave_time to zero
@@ -157,12 +157,12 @@ class RelayNodePeriodicSim:
 
 
 # Script
-m = 1
-n = 10
-p = 100
-avg_inter_arrival_time = 200
+m = 100
+n = 1000
+p = 200
+avg_inter_arrival_time = 45
 avg_service_time = 40
-isVerbose = True
+isVerbose = False
 
 avg_measured_inter_arrival_time = []
 avg_relay_node_residence_time = []
@@ -180,14 +180,14 @@ for i in range(m):
     avg_server_residence_time.append(metrics[4])
     avg_end_to_end_time.append(metrics[5])
 
-print("inputs")
-print("input avg inter arrival time: " + str(avg_inter_arrival_time))
-print("input avg service time: " + str(avg_service_time))
-print()
-print("metrics")
-print("avg_measured_inter_arrival_time: " + str(Sim_math_ops.average(avg_measured_inter_arrival_time)))
-print("avg_relay_node_residence_time: " + str(Sim_math_ops.average(avg_relay_node_residence_time)))
-print("avg_server_queue_time: " + str(Sim_math_ops.average(avg_server_queue_time)))
-print("avg_server_service_time: " + str(Sim_math_ops.average(avg_server_service_time)))
-print("avg_server_residence_time: " + str(Sim_math_ops.average(avg_server_residence_time)))
+# print("inputs")
+# print("input avg inter arrival time: " + str(avg_inter_arrival_time))
+# print("input avg service time: " + str(avg_service_time))
+# print()
+# print("metrics")
+# print("avg_measured_inter_arrival_time: " + str(Sim_math_ops.average(avg_measured_inter_arrival_time)))
+# print("avg_relay_node_residence_time: " + str(Sim_math_ops.average(avg_relay_node_residence_time)))
+# print("avg_server_queue_time: " + str(Sim_math_ops.average(avg_server_queue_time)))
+# print("avg_server_service_time: " + str(Sim_math_ops.average(avg_server_service_time)))
+# print("avg_server_residence_time: " + str(Sim_math_ops.average(avg_server_residence_time)))
 print("avg_end_to_end_time: " + str(Sim_math_ops.average(avg_end_to_end_time)))
