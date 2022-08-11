@@ -136,7 +136,7 @@ class RelayNodeThresholdSim:
 m = 100  # repetition of experiments
 n = 10000
 t = 3
-mean_inter_arrival_time = 45
+mean_inter_arrival_time = 43
 # nter_arrival_times_distribution = "CONSTANT"
 inter_arrival_times_distribution = "EXPONENTIAL"
 mean_service_time = 40

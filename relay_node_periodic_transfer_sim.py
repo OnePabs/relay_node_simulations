@@ -160,7 +160,7 @@ class RelayNodePeriodicSim:
 m = 100
 n = 1000
 p = 200
-avg_inter_arrival_time = 45
+avg_inter_arrival_time = 48
 avg_service_time = 40
 isVerbose = False
 
