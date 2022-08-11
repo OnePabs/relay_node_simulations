@@ -46,7 +46,9 @@ class RelayNodePeriodicSim:
             inter_arrival_times_distribution,   #Arrival times distribution (Exponential or Constant)
             avg_service_time,                   #Average service time at the server
             service_times_distribution,         #Distribution of service times at the server (Exponential or Constant)
-            isVerbose                           #If true displays results and intermediate steps
+            isVerbose,                          #If true displays results and intermediate steps
+            use_linear_service_time = False,      # Use a server service time that uses step values that are linear to the size of a batch
+            mean_access_time = 25
             ):
         # create the arrival times to the relay node
         arrival_times = n * [0]
@@ -91,16 +93,21 @@ class RelayNodePeriodicSim:
             relay_node_residence_times[i] = relay_node_exit_times[i] - arrival_times[i]
 
         # create server service times
-        service_times = num_periods * [0]  # one service time for each batch data transfer
-        if service_times_distribution.upper() == "CONSTANT":
-            for i in range(num_periods):
-                service_times[i] = Sim_math_ops.const(avg_service_time)    #constant
-        elif service_times_distribution.upper() == "EXPONENTIAL":
-            for i in range(num_periods):
-                service_times[i] = Sim_math_ops.exp(avg_service_time)  # exponential
+        service_times = []
+        batch_access_times = num_periods * [0]
+        if use_linear_service_time:
+            service_times = n * [0]
         else:
-            print("Unrecognized server service time distribution. Program will halt...")
-            exit(0)
+            service_times = num_periods * [0]  # one service time for each batch data transfer
+            if service_times_distribution.upper() == "CONSTANT":
+                for i in range(num_periods):
+                    service_times[i] = Sim_math_ops.const(avg_service_time)    #constant
+            elif service_times_distribution.upper() == "EXPONENTIAL":
+                for i in range(num_periods):
+                    service_times[i] = Sim_math_ops.exp(avg_service_time)  # exponential
+            else:
+                print("Unrecognized server service time distribution. Program will halt...")
+                exit(0)
 
         # create batches as [[list of request indexes that are part of this batch],period,service_time,server_leave_time,server_queue_time]
         # we initialize the server_leave_time to zero
@@ -118,7 +125,30 @@ class RelayNodePeriodicSim:
                     break
             batch.append(req_indexes)  # append the request indexes to the batch
             batch.append(period_times[i])  # append the period to the batch
-            batch.append(service_times[i])  # append corresponding service time
+            #append server service time for batch
+            if len(req_indexes) > 0:
+                if use_linear_service_time:
+                    if service_times_distribution.upper() == "CONSTANT":
+                        batch.append(mean_access_time + (avg_service_time - mean_access_time)*len(req_indexes))
+                    elif service_times_distribution.upper() == "EXPONENTIAL":
+                        curr_access_time = Sim_math_ops.exp(mean_access_time)
+                        curr_service_times = len(req_indexes)*[0]
+                        for curr_st_idx in range(len(curr_service_times)):
+                            curr_service_times[curr_st_idx] = Sim_math_ops.exp(avg_service_time - mean_access_time)
+                        batch.append(curr_access_time + sum(curr_service_times))
+                    else:
+                        print("Unrecognized server service time distribution. Program will halt...")
+                        exit(0)
+                else:
+                    if service_times_distribution.upper() == "CONSTANT":
+                        batch.append(avg_service_time)
+                    elif service_times_distribution.upper() == "EXPONENTIAL":
+                        batch.append(Sim_math_ops.exp(avg_service_time))
+                    else:
+                        print("Unrecognized server service time distribution. Program will halt...")
+                        exit(0)
+            else:
+                batch.append(0)
             batch.append(0)  # append server leave time as zero. this will be calculated later
             batch.append(0)  # append queue time as zero. this will be calculated later
             batches.append(batch)  # append batch to list of batches
@@ -184,9 +214,9 @@ class RelayNodePeriodicSim:
 # Script
 
 ### INPUTS ###
-m = 1               #number of times experiment is repeated
+m = 100               #number of times experiment is repeated
 
-n = 10                                              #number of requests to simulate
+n = 1000                                            #number of requests to simulate
 p = 200                                             #Period at which the relay node sends transfers
 avg_inter_arrival_time = 50                         #Average inter arrival time
 #inter_arrival_times_distribution = "CONSTANT"       #Arrival times distribution (Exponential or Constant)
@@ -194,7 +224,10 @@ inter_arrival_times_distribution = "EXPONENTIAL"    #Arrival times distribution 
 avg_service_time = 40                               #Average service time at the server
 #service_times_distribution = "CONSTANT"             #Distribution of service times at the server (Exponential or Constant)
 service_times_distribution = "EXPONENTIAL"          #Distribution of service times at the server (Exponential or Constant)
-isVerbose = True                                    #If true displays results and intermediate steps
+isVerbose = False                                    #If true displays results and intermediate steps
+use_linear_service_time = True
+mean_access_time = 25
+
 
 ### VARIABLES TO STORE OUTPUTS ###
 avg_measured_inter_arrival_time = []
@@ -206,7 +239,7 @@ avg_end_to_end_time = []
 
 ### PERFORM EXPERIMENTS ###
 for i in range(m):
-    metrics = RelayNodePeriodicSim.run(n, p, avg_inter_arrival_time, inter_arrival_times_distribution, avg_service_time, service_times_distribution, isVerbose)
+    metrics = RelayNodePeriodicSim.run(n, p, avg_inter_arrival_time, inter_arrival_times_distribution, avg_service_time, service_times_distribution, isVerbose, use_linear_service_time, mean_access_time)
     avg_measured_inter_arrival_time.append(metrics[0])
     avg_relay_node_residence_time.append(metrics[1])
     avg_server_queue_time.append(metrics[2])
