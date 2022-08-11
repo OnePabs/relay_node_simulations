@@ -39,13 +39,28 @@ class RelayNodePeriodicSim:
     # avg_inter_arrival_time = average inter arrival times at the relay node
     # isVerbose = if true, then results are printed
     @staticmethod
-    def run(n, p, avg_service_time, avg_inter_arrival_time, isVerbose):
+    def run(
+            n,                                  #number of requests to simulate
+            p,                                  #Period at which the relay node sends transfers
+            avg_inter_arrival_time,             #Average inter arrival time
+            inter_arrival_times_distribution,   #Arrival times distribution (Exponential or Constant)
+            avg_service_time,                   #Average service time at the server
+            service_times_distribution,         #Distribution of service times at the server (Exponential or Constant)
+            isVerbose                           #If true displays results and intermediate steps
+            ):
         # create the arrival times to the relay node
         arrival_times = n * [0]
-        for i in range(1, n):  # the first arrival is taken to happen at time 0
-            arrival_times[i] = arrival_times[i - 1] + Sim_math_ops.exp(avg_inter_arrival_time)  # exponential
-            #arrival_times[i] = arrival_times[i-1] + Sim_math_ops.const(avg_inter_arrival_time)   #constant
-        #print(arrival_times)
+        if inter_arrival_times_distribution.upper() == "CONSTANT":
+            for i in range(1, n):  # the first arrival is taken to happen at time 0
+                arrival_times[i] = arrival_times[i - 1] + Sim_math_ops.const(avg_inter_arrival_time)
+        elif inter_arrival_times_distribution.upper() == "EXPONENTIAL":
+            for i in range(1, n):  # the first arrival is taken to happen at time 0
+                arrival_times[i] = arrival_times[i - 1] + Sim_math_ops.exp(avg_inter_arrival_time)  # exponential
+        else:
+            print("Unrecognized inter arrival time distribution. Program will halt...")
+            exit(0)
+        if isVerbose:
+            print(arrival_times)
 
         # Create Periods of transfer (a maximum of the time the last arrival occured plus one period will be needed)
         last_arrival = arrival_times[n - 1]
@@ -59,7 +74,7 @@ class RelayNodePeriodicSim:
             period_times[i] = p * (i + 1)
         #print(period_times)
 
-        # calculate exit times from relay node   ################ do double for loop to search for the period for each relay node arrival
+        # calculate exit times from relay node
         relay_node_exit_times = n * [0]
         last_period_idx = 0
         #Since arrival_times and period_times are sorted, we can use last_period_idx
@@ -77,9 +92,15 @@ class RelayNodePeriodicSim:
 
         # create server service times
         service_times = num_periods * [0]  # one service time for each batch data transfer
-        for i in range(num_periods):
-            service_times[i] = Sim_math_ops.exp(avg_service_time)  # exponential
-            #service_times[i] = Sim_math_ops.const(avg_service_time)    #constant
+        if service_times_distribution.upper() == "CONSTANT":
+            for i in range(num_periods):
+                service_times[i] = Sim_math_ops.const(avg_service_time)    #constant
+        elif service_times_distribution.upper() == "EXPONENTIAL":
+            for i in range(num_periods):
+                service_times[i] = Sim_math_ops.exp(avg_service_time)  # exponential
+        else:
+            print("Unrecognized server service time distribution. Program will halt...")
+            exit(0)
 
         # create batches as [[list of request indexes that are part of this batch],period,service_time,server_leave_time,server_queue_time]
         # we initialize the server_leave_time to zero
@@ -101,9 +122,11 @@ class RelayNodePeriodicSim:
             batch.append(0)  # append server leave time as zero. this will be calculated later
             batch.append(0)  # append queue time as zero. this will be calculated later
             batches.append(batch)  # append batch to list of batches
-        #         print()
-        #         print("batches")
-        #         print(batches)
+
+        if isVerbose:
+            print()
+            print("batches")
+            print(batches)
 
         # calculate the server exit times for each batch
         batches[0][3] = batches[0][1] + batches[0][2]  # the first batch exit time is its period + its service time
@@ -124,12 +147,13 @@ class RelayNodePeriodicSim:
                 server_service_times[req_idx] = batch[2]
                 server_exit_times[req_idx] = batch[3]
                 server_queue_times[req_idx] = batch[4]
-        #         print()
-        #         print("server exit times:")
-        #         print(server_exit_times)
-        #         print()
-        #         print("server_queue_times")
-        #         print(server_queue_times)
+        if isVerbose:
+            print()
+            print("server exit times:")
+            print(server_exit_times)
+            print()
+            print("server_queue_times")
+            print(server_queue_times)
 
         # calculate server residence times and end to end times
         server_residence_times = n * [0]
@@ -137,12 +161,13 @@ class RelayNodePeriodicSim:
         for i in range(n):
             server_residence_times[i] = server_exit_times[i] - relay_node_exit_times[i]
             end_to_end_times[i] = server_exit_times[i] - arrival_times[i]
-        #         print()
-        #         print("server_residence_times")
-        #         print(server_residence_times)
-        #         print()
-        #         print("end_to_end_times")
-        #         print(end_to_end_times)
+        if isVerbose:
+            print()
+            print("server_residence_times")
+            print(server_residence_times)
+            print()
+            print("end_to_end_times")
+            print(end_to_end_times)
 
         # calulate averages
         avg_measured_inter_arrival_time = Sim_math_ops.avg_inter_arrival(arrival_times)
@@ -157,13 +182,21 @@ class RelayNodePeriodicSim:
 
 
 # Script
-m = 100
-n = 1000
-p = 200
-avg_inter_arrival_time = 48
-avg_service_time = 40
-isVerbose = False
 
+### INPUTS ###
+m = 1               #number of times experiment is repeated
+
+n = 10                                              #number of requests to simulate
+p = 200                                             #Period at which the relay node sends transfers
+avg_inter_arrival_time = 50                         #Average inter arrival time
+#inter_arrival_times_distribution = "CONSTANT"       #Arrival times distribution (Exponential or Constant)
+inter_arrival_times_distribution = "EXPONENTIAL"    #Arrival times distribution (Exponential or Constant)
+avg_service_time = 40                               #Average service time at the server
+#service_times_distribution = "CONSTANT"             #Distribution of service times at the server (Exponential or Constant)
+service_times_distribution = "EXPONENTIAL"          #Distribution of service times at the server (Exponential or Constant)
+isVerbose = True                                    #If true displays results and intermediate steps
+
+### VARIABLES TO STORE OUTPUTS ###
 avg_measured_inter_arrival_time = []
 avg_relay_node_residence_time = []
 avg_server_queue_time = []
@@ -171,8 +204,9 @@ avg_server_service_time = []
 avg_server_residence_time = []
 avg_end_to_end_time = []
 
+### PERFORM EXPERIMENTS ###
 for i in range(m):
-    metrics = RelayNodePeriodicSim.run(n, p, avg_service_time, avg_inter_arrival_time, isVerbose)
+    metrics = RelayNodePeriodicSim.run(n, p, avg_inter_arrival_time, inter_arrival_times_distribution, avg_service_time, service_times_distribution, isVerbose)
     avg_measured_inter_arrival_time.append(metrics[0])
     avg_relay_node_residence_time.append(metrics[1])
     avg_server_queue_time.append(metrics[2])
@@ -180,14 +214,17 @@ for i in range(m):
     avg_server_residence_time.append(metrics[4])
     avg_end_to_end_time.append(metrics[5])
 
-# print("inputs")
-# print("input avg inter arrival time: " + str(avg_inter_arrival_time))
-# print("input avg service time: " + str(avg_service_time))
-# print()
-# print("metrics")
-# print("avg_measured_inter_arrival_time: " + str(Sim_math_ops.average(avg_measured_inter_arrival_time)))
-# print("avg_relay_node_residence_time: " + str(Sim_math_ops.average(avg_relay_node_residence_time)))
-# print("avg_server_queue_time: " + str(Sim_math_ops.average(avg_server_queue_time)))
-# print("avg_server_service_time: " + str(Sim_math_ops.average(avg_server_service_time)))
-# print("avg_server_residence_time: " + str(Sim_math_ops.average(avg_server_residence_time)))
+### PRINT RESULTS ###
+if isVerbose:
+    print()
+    print("inputs")
+    print("input avg inter arrival time: " + str(avg_inter_arrival_time))
+    print("input avg service time: " + str(avg_service_time))
+    print()
+    print("metrics")
+    print("avg_measured_inter_arrival_time: " + str(Sim_math_ops.average(avg_measured_inter_arrival_time)))
+    print("avg_relay_node_residence_time: " + str(Sim_math_ops.average(avg_relay_node_residence_time)))
+    print("avg_server_queue_time: " + str(Sim_math_ops.average(avg_server_queue_time)))
+    print("avg_server_service_time: " + str(Sim_math_ops.average(avg_server_service_time)))
+    print("avg_server_residence_time: " + str(Sim_math_ops.average(avg_server_residence_time)))
 print("avg_end_to_end_time: " + str(Sim_math_ops.average(avg_end_to_end_time)))
