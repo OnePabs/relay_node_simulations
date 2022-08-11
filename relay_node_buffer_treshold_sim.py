@@ -40,8 +40,17 @@ class RelayNodeThresholdSim:
     # [2] avg_server_queue_time
     # [3] avg_server_residence_time
     @staticmethod
-    def run(n, t, avg_inter_arrival_time, inter_arrival_times_distribution, avg_service_time,
-            service_times_distribution, isVerbose):
+    def run(
+            n,
+            t,
+            avg_inter_arrival_time,
+            inter_arrival_times_distribution,
+            avg_service_time,
+            service_times_distribution,
+            isVerbose,
+            use_linear_service_time=False, # Use a server service time that uses step values that are linear to the size of a batch
+            mean_access_time=25
+    ):
         # n accepted can only be a multiple of T so that all requests exit the relay node.
         # In the Java implementation of the system, there is a maximum period P at which, even if there aren't T requests buffered, the data transfer happens anyway
         if n % t != 0:
@@ -56,7 +65,8 @@ class RelayNodeThresholdSim:
         elif inter_arrival_times_distribution.upper() == "EXPONENTIAL":
             for i in range(1, n):  # the first arrival is taken to happen at time 0
                 arrival_times[i] = arrival_times[i - 1] + Sim_math_ops.exp(avg_inter_arrival_time)  # exponential
-        # print(arrival_times)
+        if isVerbose:
+            print(arrival_times)
 
         # create the appropriate batches with their request indexes.
         # calculate the relay node exit time for each batch
@@ -97,11 +107,10 @@ class RelayNodeThresholdSim:
                 batches[i][2] = batches[i][1]
             else:
                 # there is a queue when the batch arrives
-                batches[i][2] = batches[i - 1][
-                    4]  # batch starts its service time at the time the batch before it leaves the server
-            batches[i][4] = batches[i][2] + batches[i][
-                3]  # batch finishes its service time at the time it starts its service time + its service time
-        # print(batches)
+                batches[i][2] = batches[i - 1][4]  # batch starts its service time at the time the batch before it leaves the server
+            batches[i][4] = batches[i][2] + batches[i][3]  # batch finishes its service time at the time it starts its service time + its service time
+        if isVerbose:
+            print(batches)
 
         # calculate relay node residence times, server queue times, server residence times, and end to end times
         relay_node_residence_times = n * [0]
@@ -133,15 +142,15 @@ class RelayNodeThresholdSim:
                 avg_server_residence_time, avg_end_to_end_time]
 
 
-m = 100  # repetition of experiments
-n = 10000
+m = 1  # repetition of experiments
+n = 10
 t = 3
-mean_inter_arrival_time = 43
-# nter_arrival_times_distribution = "CONSTANT"
-inter_arrival_times_distribution = "EXPONENTIAL"
+mean_inter_arrival_time = 50
+inter_arrival_times_distribution = "CONSTANT"
+#inter_arrival_times_distribution = "EXPONENTIAL"
 mean_service_time = 40
-# service_times_distribution = "CONSTANT"
-service_times_distribution = "EXPONENTIAL"
+service_times_distribution = "CONSTANT"
+#service_times_distribution = "EXPONENTIAL"
 isVerbose = True
 
 avg_measured_inter_arrival_times = m * [0]
@@ -161,10 +170,11 @@ for i in range(m):
     avg_server_residence_times[i] = metrics[4]
     avg_end_to_end_times[i] = metrics[5]
 
-# print("metrics: ")
-# print("average measured inter arrival time: " + str(Sim_math_ops.average(avg_measured_inter_arrival_times)))
-# print("avg_relay_node_residence_times: " + str(Sim_math_ops.average(avg_relay_node_residence_times)))
-# print("avg_server_queue_times: " + str(Sim_math_ops.average(avg_server_queue_times)))
-# print("avg_measured_server_service_times: " + str(Sim_math_ops.average(avg_measured_server_service_times)))
-# print("avg_server_residence_times: " + str(Sim_math_ops.average(avg_server_residence_times)))
+if isVerbose:
+    print("metrics: ")
+    print("average measured inter arrival time: " + str(Sim_math_ops.average(avg_measured_inter_arrival_times)))
+    print("avg_relay_node_residence_times: " + str(Sim_math_ops.average(avg_relay_node_residence_times)))
+    print("avg_server_queue_times: " + str(Sim_math_ops.average(avg_server_queue_times)))
+    print("avg_measured_server_service_times: " + str(Sim_math_ops.average(avg_measured_server_service_times)))
+    print("avg_server_residence_times: " + str(Sim_math_ops.average(avg_server_residence_times)))
 print("avg_end_to_end_times: " + str(Sim_math_ops.average(avg_end_to_end_times)))
