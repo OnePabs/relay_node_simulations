@@ -214,17 +214,17 @@ class RelayNodePeriodicSim:
 # Script
 
 ### INPUTS ###
-m = 100               #number of times experiment is repeated
+m = 1               #number of times experiment is repeated
 
-n = 1000                                            #number of requests to simulate
+n = 10                                            #number of requests to simulate
 p = 200                                             #Period at which the relay node sends transfers
 avg_inter_arrival_time = 50                         #Average inter arrival time
-#inter_arrival_times_distribution = "CONSTANT"       #Arrival times distribution (Exponential or Constant)
-inter_arrival_times_distribution = "EXPONENTIAL"    #Arrival times distribution (Exponential or Constant)
+inter_arrival_times_distribution = "CONSTANT"       #Arrival times distribution (Exponential or Constant)
+#inter_arrival_times_distribution = "EXPONENTIAL"    #Arrival times distribution (Exponential or Constant)
 avg_service_time = 40                               #Average service time at the server
-#service_times_distribution = "CONSTANT"             #Distribution of service times at the server (Exponential or Constant)
-service_times_distribution = "EXPONENTIAL"          #Distribution of service times at the server (Exponential or Constant)
-isVerbose = False                                    #If true displays results and intermediate steps
+service_times_distribution = "CONSTANT"             #Distribution of service times at the server (Exponential or Constant)
+#service_times_distribution = "EXPONENTIAL"          #Distribution of service times at the server (Exponential or Constant)
+isVerbose = True                                    #If true displays results and intermediate steps
 use_linear_service_time = True
 mean_access_time = 25
 
