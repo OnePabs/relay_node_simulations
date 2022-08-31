@@ -124,8 +124,7 @@ class RelayNodeThresholdSim:
                     j]  # request relay node residence time is the batch relay node exit time - the request arrival time
                 server_queue_times[j] = batches[i][2] - batches[i][
                     1]  # batch server service entry time - batch relay node exit time
-                server_service_times[j] = batches[i][4] - batches[i][
-                    2]  # batch server service exit time - batch server service entry time
+                server_service_times[j] = batches[i][4] - batches[i][2]  # batch server service exit time - batch server service entry time
                 server_residence_times[j] = batches[i][4] - batches[i][
                     1]  # batch server service exit time - batch relay node exit time
                 end_to_end_times[j] = batches[i][4] - arrival_times[j]
@@ -142,16 +141,16 @@ class RelayNodeThresholdSim:
                 avg_server_residence_time, avg_end_to_end_time]
 
 
-m = 1  # repetition of experiments
-n = 10
+m = 100  # repetition of experiments
+n = 1000
 t = 3
-mean_inter_arrival_time = 50
-inter_arrival_times_distribution = "CONSTANT"
-#inter_arrival_times_distribution = "EXPONENTIAL"
+mean_inter_arrival_time = 100
+#inter_arrival_times_distribution = "CONSTANT"
+inter_arrival_times_distribution = "EXPONENTIAL"
 mean_service_time = 40
-service_times_distribution = "CONSTANT"
-#service_times_distribution = "EXPONENTIAL"
-isVerbose = True
+#service_times_distribution = "CONSTANT"
+service_times_distribution = "EXPONENTIAL"
+isVerbose = False
 
 avg_measured_inter_arrival_times = m * [0]
 avg_relay_node_residence_times = m * [0]
@@ -159,6 +158,7 @@ avg_server_queue_times = m * [0]
 avg_measured_server_service_times = m * [0]
 avg_server_residence_times = m * [0]
 avg_end_to_end_times = m * [0]
+print_all_results = True
 
 for i in range(m):
     metrics = RelayNodeThresholdSim.run(n, t, mean_inter_arrival_time, inter_arrival_times_distribution,
@@ -170,7 +170,7 @@ for i in range(m):
     avg_server_residence_times[i] = metrics[4]
     avg_end_to_end_times[i] = metrics[5]
 
-if isVerbose:
+if print_all_results:
     print("metrics: ")
     print("average measured inter arrival time: " + str(Sim_math_ops.average(avg_measured_inter_arrival_times)))
     print("avg_relay_node_residence_times: " + str(Sim_math_ops.average(avg_relay_node_residence_times)))

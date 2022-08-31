@@ -86,7 +86,7 @@ class MM1QueueSim:
 m = 100  # number of times the experiment is run
 n = 10000  # number of requests
 avg_service_time = 40  # average service time
-avg_inter_arrival_time = 43  # average inter arrival time
+avg_inter_arrival_time = 100  # average inter arrival time
 isVerbose = False
 
 average_residence_times = m * [0]

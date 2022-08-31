@@ -214,18 +214,17 @@ class RelayNodePeriodicSim:
 # Script
 
 ### INPUTS ###
-m = 1               #number of times experiment is repeated
-
-n = 10                                            #number of requests to simulate
+m = 100                                             #number of times experiment is repeated
+n = 1000                                            #number of requests to simulate
 p = 200                                             #Period at which the relay node sends transfers
 avg_inter_arrival_time = 50                         #Average inter arrival time
-inter_arrival_times_distribution = "CONSTANT"       #Arrival times distribution (Exponential or Constant)
-#inter_arrival_times_distribution = "EXPONENTIAL"    #Arrival times distribution (Exponential or Constant)
-avg_service_time = 40                               #Average service time at the server
-service_times_distribution = "CONSTANT"             #Distribution of service times at the server (Exponential or Constant)
-#service_times_distribution = "EXPONENTIAL"          #Distribution of service times at the server (Exponential or Constant)
-isVerbose = True                                    #If true displays results and intermediate steps
-use_linear_service_time = True
+#inter_arrival_times_distribution = "CONSTANT"       #Arrival times distribution (Exponential or Constant)
+inter_arrival_times_distribution = "EXPONENTIAL"    #Arrival times distribution (Exponential or Constant)
+avg_service_time = 10                               #Average service time at the server
+#service_times_distribution = "CONSTANT"             #Distribution of service times at the server (Exponential or Constant)
+service_times_distribution = "EXPONENTIAL"          #Distribution of service times at the server (Exponential or Constant)
+isVerbose = False                                    #If true displays results and intermediate steps
+use_linear_service_time = False
 mean_access_time = 25
 
 
@@ -236,6 +235,7 @@ avg_server_queue_time = []
 avg_server_service_time = []
 avg_server_residence_time = []
 avg_end_to_end_time = []
+print_all_results = True
 
 ### PERFORM EXPERIMENTS ###
 for i in range(m):
@@ -248,7 +248,7 @@ for i in range(m):
     avg_end_to_end_time.append(metrics[5])
 
 ### PRINT RESULTS ###
-if isVerbose:
+if print_all_results:
     print()
     print("inputs")
     print("input avg inter arrival time: " + str(avg_inter_arrival_time))
