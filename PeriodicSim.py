@@ -3,35 +3,10 @@
 # the relay node buffers requests and periodically transfers all requests in the buffer to the server as a batch
 # all requests from a same batch get serviced together
 
-import numpy as np
 import math
+from Sim_math_ops import Sim_math_ops
 
-
-class Sim_math_ops:
-    @staticmethod
-    def const(value):
-        return value
-
-    # this function generates numbers that are exponentialy distributed with a mean "mean"
-    # It was taken from this website: https://www.weibull.com/hotwire/issue201/hottopics201.htm
-    @staticmethod
-    def exp(mean):
-        return (-mean * math.log(1 - np.random.uniform(0, 1)))
-
-    # this function calculates the average of numbers inside a list
-    @staticmethod
-    def average(lst):
-        return sum(lst) / len(lst)
-
-    @staticmethod
-    def avg_inter_arrival(lst):
-        lst2 = (len(lst) - 1) * [0]
-        for i in range(1, len(lst)):
-            lst2[i - 1] = lst[i] - lst[i - 1]
-        return Sim_math_ops.average(lst2)
-
-
-class RelayNodePeriodicSim:
+class PeriodicSim:
     ###
     # n = number of requests to simulate
     # p = period at which the relay node will perform the data transfers
@@ -239,7 +214,7 @@ print_all_results = True
 
 ### PERFORM EXPERIMENTS ###
 for i in range(m):
-    metrics = RelayNodePeriodicSim.run(n, p, avg_inter_arrival_time, inter_arrival_times_distribution, avg_service_time, service_times_distribution, isVerbose, use_linear_service_time, mean_access_time)
+    metrics = PeriodicSim.run(n, p, avg_inter_arrival_time, inter_arrival_times_distribution, avg_service_time, service_times_distribution, isVerbose, use_linear_service_time, mean_access_time)
     avg_measured_inter_arrival_time.append(metrics[0])
     avg_relay_node_residence_time.append(metrics[1])
     avg_server_queue_time.append(metrics[2])

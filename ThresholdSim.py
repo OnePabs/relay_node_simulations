@@ -1,32 +1,7 @@
-import numpy as np  # linear algebra
-import math
+from Sim_math_ops import Sim_math_ops
 
 
-class Sim_math_ops:
-    @staticmethod
-    def const(value):
-        return value
-
-    # this function generates numbers that are exponentialy distributed with a mean "mean"
-    # It was taken from this website: https://www.weibull.com/hotwire/issue201/hottopics201.htm
-    @staticmethod
-    def exp(mean):
-        return (-mean * math.log(1 - np.random.uniform(0, 1)))
-
-    # this function calculates the average of numbers inside a list
-    @staticmethod
-    def average(lst):
-        return sum(lst) / len(lst)
-
-    @staticmethod
-    def avg_inter_arrival(lst):
-        lst2 = (len(lst) - 1) * [0]
-        for i in range(1, len(lst)):
-            lst2[i - 1] = lst[i] - lst[i - 1]
-        return Sim_math_ops.average(lst2)
-
-
-class RelayNodeThresholdSim:
+class ThresholdSim:
     ###
     # n = number of requests to simulate
     # t = after t requests have been buffered, a data transfer takes place
@@ -161,7 +136,7 @@ avg_end_to_end_times = m * [0]
 print_all_results = True
 
 for i in range(m):
-    metrics = RelayNodeThresholdSim.run(n, t, mean_inter_arrival_time, inter_arrival_times_distribution,
+    metrics = ThresholdSim.run(n, t, mean_inter_arrival_time, inter_arrival_times_distribution,
                                         mean_service_time, service_times_distribution, isVerbose)
     avg_measured_inter_arrival_times[i] = metrics[0]
     avg_relay_node_residence_times[i] = metrics[1]

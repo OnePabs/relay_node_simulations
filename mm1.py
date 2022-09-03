@@ -4,29 +4,7 @@
 # This code is different in 3 aspects: First the function to generate exponentialy distributed values is different,
 # secondly the average inter arrival time can be other than one, and thirdly the number of requests used in the simulation is variable
 
-import numpy as np
-import math
-
-
-class Sim_math_ops:
-    # this function generates numbers that are exponentialy distributed with a mean "mean"
-    # It was taken from this website: https://www.weibull.com/hotwire/issue201/hottopics201.htm
-    @staticmethod
-    def exp(mean):
-        return (-mean * math.log(1 - np.random.uniform(0, 1)))
-
-    # this function calculates the average of numbers inside a list
-    @staticmethod
-    def average(lst):
-        return sum(lst) / len(lst)
-
-    @staticmethod
-    def avg_inter_arrival(lst):
-        lst2 = (len(lst) - 1) * [0]
-        for i in range(1, len(lst)):
-            lst2[i - 1] = lst[i] - lst[i - 1]
-        return Sim_math_ops.average(lst2)
-
+from Sim_math_ops import Sim_math_ops
 
 class MM1QueueSim:
     @staticmethod
