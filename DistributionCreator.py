@@ -56,37 +56,53 @@ class DistributionCreator(unittest.TestCase):
         list_of_numbers = n*[0]
         for i in range(n):
             list_of_numbers[i] = -mean * math.log(1 - np.random.uniform(0, 1))
-        DistributionCreator.write_list_of_numbers(list_of_numbers,filepath,append)
-        return
+        if not filepath:  # empty String
+            return list_of_numbers
+        else:
+            DistributionCreator.write_list_of_numbers(list_of_numbers, filepath, append)
+            return
 
     @staticmethod
-    def poisson(n,mean,filepath,append=True):
+    def poisson(n,mean,filepath,append=True, previous_last_num=0):
         list_of_numbers = n * [0]
-        if append:
-            last_num = DistributionCreator.read_last_number(filepath)
-            list_of_numbers[0] = last_num + (-mean * math.log(1 - np.random.uniform(0, 1)))
+        if append and filepath:
+            previous_last_num = DistributionCreator.read_last_number(filepath)
+            list_of_numbers[0] = previous_last_num + (-mean * math.log(1 - np.random.uniform(0, 1)))
+        elif append:
+            list_of_numbers[0] = previous_last_num + (-mean * math.log(1 - np.random.uniform(0, 1)))
         for i in range(1,n):
             list_of_numbers[i] = list_of_numbers[i-1] + (-mean * math.log(1 - np.random.uniform(0, 1)))
-        DistributionCreator.write_list_of_numbers(list_of_numbers,filepath,append)
-        return
+        if not filepath:  # empty String
+            return list_of_numbers
+        else:
+            DistributionCreator.write_list_of_numbers(list_of_numbers, filepath, append)
+            return
 
     @staticmethod
     # Creates and writes n scalars all equal to the constant value
     def constant(n,value,filepath,append=True):
         list_of_numbers = n * [value]
-        DistributionCreator.write_list_of_numbers(list_of_numbers,filepath,append)
-        return
+        if not filepath:  # empty String
+            return list_of_numbers
+        else:
+            DistributionCreator.write_list_of_numbers(list_of_numbers, filepath, append)
+            return
 
     @staticmethod
-    def constant_running_total(n,value,filepath,append=True):
+    def constant_running_total(n,value,filepath,append=True, previous_last_num=0):
         list_of_numbers = n * [0]
-        if append:
-            last_num = DistributionCreator.read_last_number(filepath)
-            list_of_numbers[0] = last_num + value
+        if append and filepath:
+            previous_last_num = DistributionCreator.read_last_number(filepath)
+            list_of_numbers[0] = previous_last_num + value
+        elif append:
+            list_of_numbers[0] = previous_last_num + value
         for i in range(1,n):
             list_of_numbers[i] = list_of_numbers[i-1] + value
-        DistributionCreator.write_list_of_numbers(list_of_numbers, filepath, append)
-        return
+        if not filepath:    #empty String
+            return list_of_numbers
+        else:
+            DistributionCreator.write_list_of_numbers(list_of_numbers, filepath, append)
+            return
 
     @staticmethod
     # Creates and writes n scalars that are the y values of the specified line for x=0,1,2,...,n
@@ -94,8 +110,11 @@ class DistributionCreator(unittest.TestCase):
         list_of_numbers = n * [0]
         for i in range(n):
             list_of_numbers[i] = y_intercept + i*slope
-        DistributionCreator.write_list_of_numbers(list_of_numbers, filepath, append)
-        return
+        if not filepath:  # empty String
+            return list_of_numbers
+        else:
+            DistributionCreator.write_list_of_numbers(list_of_numbers, filepath, append)
+            return
 
 
     @staticmethod
@@ -106,8 +125,11 @@ class DistributionCreator(unittest.TestCase):
         list_of_numbers = n * [0]
         for i in range(n):
             list_of_numbers[i] = -(y_intercept + i * slope) * math.log(1 - np.random.uniform(0, 1))
-        DistributionCreator.write_list_of_numbers(list_of_numbers, filepath, append)
-        return
+        if not filepath:  # empty String
+            return list_of_numbers
+        else:
+            DistributionCreator.write_list_of_numbers(list_of_numbers, filepath, append)
+            return
 
 
 
