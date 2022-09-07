@@ -4,6 +4,7 @@ import math
 import unittest
 import matplotlib.pyplot as plt
 from scipy import stats
+import os
 
 class DistributionCreator(unittest.TestCase):
 
@@ -21,10 +22,23 @@ class DistributionCreator(unittest.TestCase):
         return points
 
     @staticmethod
+    def read_last_number(filepath):
+        with open(filepath, 'rb') as f:
+            try:  # catch OSError in case of a one line file
+                f.seek(-2, os.SEEK_END)
+                while f.read(1) != b'\n':
+                    f.seek(-2, os.SEEK_CUR)
+            except OSError:
+                f.seek(0)
+            last_line = f.readline().decode()
+            return float(last_line)
+
+    @staticmethod
     def write_list_of_numbers(list_of_numbers,filepath,append=True):
         f = ''
         if append:
             f = open(filepath,"a")
+            f.write("\n")
         else:
             f = open(filepath,"w")
         num_items = len(list_of_numbers)
@@ -46,10 +60,32 @@ class DistributionCreator(unittest.TestCase):
         return
 
     @staticmethod
+    def poisson(n,mean,filepath,append=True):
+        list_of_numbers = n * [0]
+        if append:
+            last_num = DistributionCreator.read_last_number(filepath)
+            list_of_numbers[0] = last_num + (-mean * math.log(1 - np.random.uniform(0, 1)))
+        for i in range(1,n):
+            list_of_numbers[i] = list_of_numbers[i-1] + (-mean * math.log(1 - np.random.uniform(0, 1)))
+        DistributionCreator.write_list_of_numbers(list_of_numbers,filepath,append)
+        return
+
+    @staticmethod
     # Creates and writes n scalars all equal to the constant value
     def constant(n,value,filepath,append=True):
         list_of_numbers = n * [value]
         DistributionCreator.write_list_of_numbers(list_of_numbers,filepath,append)
+        return
+
+    @staticmethod
+    def constant_running_total(n,value,filepath,append=True):
+        list_of_numbers = n * [0]
+        if append:
+            last_num = DistributionCreator.read_last_number(filepath)
+            list_of_numbers[0] = last_num + value
+        for i in range(1,n):
+            list_of_numbers[i] = list_of_numbers[i-1] + value
+        DistributionCreator.write_list_of_numbers(list_of_numbers, filepath, append)
         return
 
     @staticmethod
