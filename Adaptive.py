@@ -4,6 +4,7 @@
 from Sim_math_ops import Sim_math_ops
 from DistributionCreator import DistributionCreator
 from ServiceTimeSettings import *
+from MultBarDistr import MultBarDistr
 
 class Adaptive:
 
@@ -20,10 +21,12 @@ class Adaptive:
             c_thrsh,                        # When technique C is used, c_thrsh is the number of requests buffered at the relay node until a data transfer happen
             arrival_times_filepath,
             service_time_settings,          # one of the classes in ServiceTimeSettings file
+            arrival_times=[],
             isVerbose=False
     ):
 
-        arrival_times = DistributionCreator.read(arrival_times_filepath)
+        if arrival_times_filepath:
+            arrival_times = DistributionCreator.read(arrival_times_filepath)
         #print(arrival_times)
 
         #calculate the average inter arrival time of the last NPRC requests for each new arrival
@@ -69,7 +72,7 @@ class Adaptive:
                 # some requests are still batched at the end of the experiment
                 relay_node_exit_batches.append(curr_batch)
 
-        print(relay_node_exit_batches)
+        #print(relay_node_exit_batches)
 
         #calculate relay node exit times for each request
         relay_exit_times = (len(arrival_times))*[0]
@@ -95,8 +98,17 @@ class Adaptive:
         # create the service times for each batch
         service_times = []
         if isinstance(service_time_settings,ConstantDistributionSettings):
-            DistributionCreator.constant(len(relay_node_exit_batches),service_time_settings.const,service_time_settings.filepath,False)
-            service_times = DistributionCreator.read(service_time_settings.filepath)
+            if service_time_settings.filepath:
+                DistributionCreator.constant(len(relay_node_exit_batches),service_time_settings.const,service_time_settings.filepath,False)
+                service_times = DistributionCreator.read(service_time_settings.filepath)
+            else:
+                service_times = DistributionCreator.constant(len(relay_node_exit_batches),service_time_settings.const,service_time_settings.filepath,False)
+        elif isinstance(service_time_settings,ExponentialDistributionSettings):
+            if service_time_settings.filepath:
+                DistributionCreator.exponential(len(relay_node_exit_batches), service_time_settings.mean,service_time_settings.filepath, False)
+                service_times = DistributionCreator.read(service_time_settings.filepath)
+            else:
+                service_times = DistributionCreator.exponential(len(relay_node_exit_batches), service_time_settings.mean,service_time_settings.filepath, False)
         else:
             raise Exception('Service Time Distribution', 'Not Found')
 
@@ -157,37 +169,61 @@ class Adaptive:
                 avg_server_residence_time, avg_end_to_end_time]
 
 
-m = 1  # repetition of experiments
+I_values = list(range(2500,20000, 2500))
+I_values.extend( list(range(20000,100000,10000)))
+I_values.extend( list(range(100000,1000000,100000)))
+I_values.extend( list(range(1000000,11000000,1000000)))
+
+m = 10      # number of experiments per I value
 switch_ia_thrsh = 75
-NPIAC = 3
+NPIACs = [250,750]
 c_thrsh = 3
-arrival_times_filepath = r"C:\Users\juanp\OneDrive\Documents\experiments\temp\temp.txt"
-service_times_filepath = r"C:\Users\juanp\OneDrive\Documents\experiments\temp\temp2.txt"
-service_time_settings = ConstantDistributionSettings(40,service_times_filepath)
+arrival_times_filepath = "" #r"C:\Users\juanp\OneDrive\Documents\experiments\temp\temp.txt"
+service_times_filepath = "" #r"C:\Users\juanp\OneDrive\Documents\experiments\temp\temp2.txt"
+#service_time_settings = ConstantDistributionSettings(40,service_times_filepath)
+service_time_settings = ExponentialDistributionSettings(40,service_times_filepath)
+slow_inter_arrival_time = 100   # the low rate inter arrival time
+fast_inter_arrival_time = 50    # the high rate inter arrival time
+# arrival_times_distribution = "EXPONENTIAL"
+arrival_times_distribution = "POISSON"
+# arrival_times_distribution = "CONSTANT"
+# arrival_times_distribution = "CONSTANT_RUNNING_TOTAL"
+max_experiment_time = 5400000
+resultspath = r"C:\Users\juanp\OneDrive\Documents\experiments\temp\res.txt"
+write_headers = True
 isVerbose = False
 
-avg_measured_inter_arrival_times = m * [0]
-avg_relay_node_residence_times = m * [0]
-avg_server_queue_times = m * [0]
-avg_measured_server_service_times = m * [0]
-avg_server_residence_times = m * [0]
-avg_end_to_end_times = m * [0]
-print_all_results = True
+for I in I_values:
+    E_sums = len(NPIACs) * [0]   # running sum of the E for each NPIAC
+    E_avg = len(NPIACs) * [0]    # average E of each NPIAC over the m experiments performed
 
-for i in range(m):
-    metrics = Adaptive.run(switch_ia_thrsh, NPIAC, c_thrsh, arrival_times_filepath,service_time_settings, isVerbose)
-    avg_measured_inter_arrival_times[i] = metrics[0]
-    avg_relay_node_residence_times[i] = metrics[1]
-    avg_server_queue_times[i] = metrics[2]
-    avg_measured_server_service_times[i] = metrics[3]
-    avg_server_residence_times[i] = metrics[4]
-    avg_end_to_end_times[i] = metrics[5]
+    # create the arrival times
+    for exp_num in range(m):
+        arrival_times = MultBarDistr.run(arrival_times_filepath,max_experiment_time,I,slow_inter_arrival_time,fast_inter_arrival_time,arrival_times_distribution)
 
-if print_all_results:
-    print("metrics: ")
-    print("average measured inter arrival time: " + str(Sim_math_ops.average(avg_measured_inter_arrival_times)))
-    print("avg_relay_node_residence_times: " + str(Sim_math_ops.average(avg_relay_node_residence_times)))
-    print("avg_server_queue_times: " + str(Sim_math_ops.average(avg_server_queue_times)))
-    print("avg_measured_server_service_times: " + str(Sim_math_ops.average(avg_measured_server_service_times)))
-    print("avg_server_residence_times: " + str(Sim_math_ops.average(avg_server_residence_times)))
-print("avg_end_to_end_times: " + str(Sim_math_ops.average(avg_end_to_end_times)))
+        # write headers
+        if write_headers:
+            f = open(resultspath,"w")
+            f.write("I_values,")
+            for NPIAC in NPIACs:
+                f.write("NPIAC="+str(NPIAC)+",")
+            f.write("\n")
+            f.close()
+            write_headers = False
+
+        # perform experiment
+        for i in range(len(NPIACs)):
+            metrics = Adaptive.run(switch_ia_thrsh, NPIACs[i], c_thrsh, arrival_times_filepath,service_time_settings,arrival_times,isVerbose)
+            E_sums[i] += metrics[5] # metrics[5] is avg end to end time
+
+    # calculate average end to end time for each NPIAC
+    for i in range(len(E_sums)):
+        E_avg[i] = E_sums[i]/m
+
+    #write results
+    f = open(resultspath, "a")
+    f.write(str(I)+",")
+    for e in E_avg:
+        f.write(str(e) + ",")
+    f.write("\n")
+    f.close()
