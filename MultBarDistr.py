@@ -21,17 +21,20 @@ class MultBarDistr:
         n_slow = math.floor(I/slow_inter_arrival_time)
         n_high = math.floor(I/fast_inter_arrival_time)
         append = False
-        list_of_numbers = [0]
-        for idx in range(0,max_experiment_time,I):
+        list_of_numbers = []
+        if distribution == "POISSON" or distribution =="CONSTANT_RUNNING_TOTAL":
+            list_of_numbers.append(0)
+
+        for idx in range(0,max_experiment_time,I*2):
             if distribution == "EXPONENTIAL":
-                list_of_numbers.extend(DistributionCreator.exponential(n_slow, slow_inter_arrival_time, "", True,list_of_numbers[-1]))
-                list_of_numbers.extend(DistributionCreator.exponential(n_high, fast_inter_arrival_time, "", True,list_of_numbers[-1]))
+                list_of_numbers.extend(DistributionCreator.exponential(n_slow, slow_inter_arrival_time, ""))
+                list_of_numbers.extend(DistributionCreator.exponential(n_high, fast_inter_arrival_time, ""))
             elif distribution == "POISSON":
                 list_of_numbers.extend(DistributionCreator.poisson(n_slow, slow_inter_arrival_time, "", True,list_of_numbers[-1]))
                 list_of_numbers.extend(DistributionCreator.poisson(n_high, fast_inter_arrival_time, "", True,list_of_numbers[-1]))
             elif distribution == "CONSTANT":
-                list_of_numbers.extend(DistributionCreator.constant(n_slow,slow_inter_arrival_time,"",True,list_of_numbers[-1]))
-                list_of_numbers.extend(DistributionCreator.constant(n_high, fast_inter_arrival_time, "", True,list_of_numbers[-1]))
+                list_of_numbers.extend(DistributionCreator.constant(n_slow,slow_inter_arrival_time,""))
+                list_of_numbers.extend(DistributionCreator.constant(n_high, fast_inter_arrival_time, ""))
             elif distribution == "CONSTANT_RUNNING_TOTAL":
                 list_of_numbers.extend(DistributionCreator.constant_running_total(n_slow, slow_inter_arrival_time, "", True,list_of_numbers[-1]))
                 list_of_numbers.extend(DistributionCreator.constant_running_total(n_high, fast_inter_arrival_time, "", True,list_of_numbers[-1]))
