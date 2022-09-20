@@ -5,6 +5,7 @@ import unittest
 import matplotlib.pyplot as plt
 from scipy import stats
 import os
+from DistributionSettings import *
 
 class DistributionCreator(unittest.TestCase):
 
@@ -61,6 +62,7 @@ class DistributionCreator(unittest.TestCase):
         else:
             DistributionCreator.write_list_of_numbers(list_of_numbers, filepath, append)
             return
+    
 
     @staticmethod
     def poisson(n,mean,filepath,append=True, previous_last_num=0):
@@ -132,6 +134,16 @@ class DistributionCreator(unittest.TestCase):
             return
 
 
+    @staticmethod
+    def createDistribution(distributionSettings, append=True):
+        if type(distributionSettings) == ConstantDistributionSettings:
+            return DistributionCreator.constant(distributionSettings.n,distributionSettings.const,distributionSettings.filepath,append)
+        elif type(distributionSettings) == ExponentialDistributionSettings:
+            return DistributionCreator.exponential(distributionSettings.n,distributionSettings.mean,distributionSettings.filepath,append)
+        elif type(distributionSettings) == ConstantRunningTotal:
+            return DistributionCreator.constant_running_total(distributionSettings.n,distributionSettings.const,distributionSettings.filepath,append, previous_last_num=0)
+
+
 
     def test_exponential(self):
         n = 1000
@@ -156,6 +168,8 @@ class DistributionCreator(unittest.TestCase):
         print("D=" + str(D) + ",   p_value=" + str(p_value))
 
         self.assertTrue(p_value > 0.05)
+
+
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 from Sim_math_ops import Sim_math_ops
-
+from service_time_settings import *
 
 class ThresholdSim:
     ###
@@ -16,32 +16,32 @@ class ThresholdSim:
     # [3] avg_server_residence_time
     @staticmethod
     def run(
-            n,
             t,
-            avg_inter_arrival_time,
-            inter_arrival_times_distribution,
-            avg_service_time,
-            service_times_distribution,
-            isVerbose,
-            use_linear_service_time=False, # Use a server service time that uses step values that are linear to the size of a batch
-            mean_access_time=25
+            arrival_times = [],
+            service_time_distribution=ExponentialDistributionSettings,
+            n=10,
+            avg_inter_arrival_time=50,
+            arrival_time_distribution = PoissonDistributionSettings
+            avg_service_time=40,
+            isVerbose=False,
     ):
-        # n accepted can only be a multiple of T so that all requests exit the relay node.
-        # In the Java implementation of the system, there is a maximum period P at which, even if there aren't T requests buffered, the data transfer happens anyway
-        if n % t != 0:
-            n = n - n % t
-            # print(n)
+        if len(arrival_times) == 0:
+            # n accepted can only be a multiple of T so that all requests exit the relay node.
+            # In the Java implementation of the system, there is a maximum period P at which, even if there aren't T requests buffered, the data transfer happens anyway
+            if n % t != 0:
+                n = n - n % t
+                # print(n)
 
-        # create the arrival times to the relay node
-        arrival_times = n * [0]
-        if inter_arrival_times_distribution.upper() == "CONSTANT":
-            for i in range(1, n):  # the first arrival is taken to happen at time 0
-                arrival_times[i] = arrival_times[i - 1] + Sim_math_ops.const(avg_inter_arrival_time)
-        elif inter_arrival_times_distribution.upper() == "EXPONENTIAL":
-            for i in range(1, n):  # the first arrival is taken to happen at time 0
-                arrival_times[i] = arrival_times[i - 1] + Sim_math_ops.exp(avg_inter_arrival_time)  # exponential
-        if isVerbose:
-            print(arrival_times)
+            # create the arrival times to the relay node
+            arrival_times = n * [0]
+            if inter_arrival_times_distribution.upper() == "CONSTANT":
+                for i in range(1, n):  # the first arrival is taken to happen at time 0
+                    arrival_times[i] = arrival_times[i - 1] + Sim_math_ops.const(avg_inter_arrival_time)
+            elif inter_arrival_times_distribution.upper() == "EXPONENTIAL":
+                for i in range(1, n):  # the first arrival is taken to happen at time 0
+                    arrival_times[i] = arrival_times[i - 1] + Sim_math_ops.exp(avg_inter_arrival_time)  # exponential
+            if isVerbose:
+                print(arrival_times)
 
         # create the appropriate batches with their request indexes.
         # calculate the relay node exit time for each batch
@@ -116,40 +116,90 @@ class ThresholdSim:
                 avg_server_residence_time, avg_end_to_end_time]
 
 
-m = 100  # repetition of experiments
-n = 1000
-t = 3
-mean_inter_arrival_time = 100
-#inter_arrival_times_distribution = "CONSTANT"
-inter_arrival_times_distribution = "EXPONENTIAL"
-mean_service_time = 40
-#service_times_distribution = "CONSTANT"
-service_times_distribution = "EXPONENTIAL"
+# m = 100  # repetition of experiments
+# n = 1000
+# t = 3
+# mean_inter_arrival_time = 100
+# #inter_arrival_times_distribution = "CONSTANT"
+# inter_arrival_times_distribution = "EXPONENTIAL"
+# mean_service_time = 40
+# #service_times_distribution = "CONSTANT"
+# service_times_distribution = "EXPONENTIAL"
+# isVerbose = False
+
+# avg_measured_inter_arrival_times = m * [0]
+# avg_relay_node_residence_times = m * [0]
+# avg_server_queue_times = m * [0]
+# avg_measured_server_service_times = m * [0]
+# avg_server_residence_times = m * [0]
+# avg_end_to_end_times = m * [0]
+# print_all_results = True
+
+# for i in range(m):
+#     metrics = ThresholdSim.run(n, t, mean_inter_arrival_time, inter_arrival_times_distribution,
+#                                         mean_service_time, service_times_distribution, isVerbose)
+#     avg_measured_inter_arrival_times[i] = metrics[0]
+#     avg_relay_node_residence_times[i] = metrics[1]
+#     avg_server_queue_times[i] = metrics[2]
+#     avg_measured_server_service_times[i] = metrics[3]
+#     avg_server_residence_times[i] = metrics[4]
+#     avg_end_to_end_times[i] = metrics[5]
+
+# if print_all_results:
+#     print("metrics: ")
+#     print("average measured inter arrival time: " + str(Sim_math_ops.average(avg_measured_inter_arrival_times)))
+#     print("avg_relay_node_residence_times: " + str(Sim_math_ops.average(avg_relay_node_residence_times)))
+#     print("avg_server_queue_times: " + str(Sim_math_ops.average(avg_server_queue_times)))
+#     print("avg_measured_server_service_times: " + str(Sim_math_ops.average(avg_measured_server_service_times)))
+#     print("avg_server_residence_times: " + str(Sim_math_ops.average(avg_server_residence_times)))
+# print("avg_end_to_end_times: " + str(Sim_math_ops.average(avg_end_to_end_times)))
+
+
+max_experiment_time = 5400000
+arrival_times_distribution = "POISSON"
+arrival_times_filepath = "" #r"C:\Users\juanp\OneDrive\Documents\experiments\temp\temp.txt"
+service_times_filepath = "" #r"C:\Users\juanp\OneDrive\Documents\experiments\temp\temp2.txt"
+# service_time_distribution = ConstantDistributionSettings(40,r"C:\Users\juanpablocontreras\Documents\temp\st.txt")
+service_time_settings = ExponentialDistributionSettings(40,service_times_filepath)
+slow_inter_arrival_time = 100   # the low rate inter arrival time
+fast_inter_arrival_time = 50    # the high rate inter arrival time
+resultspath = r"M:\temp\res.txt"
+write_headers = True
 isVerbose = False
+average_residence_times = m * [0]
 
-avg_measured_inter_arrival_times = m * [0]
-avg_relay_node_residence_times = m * [0]
-avg_server_queue_times = m * [0]
-avg_measured_server_service_times = m * [0]
-avg_server_residence_times = m * [0]
-avg_end_to_end_times = m * [0]
-print_all_results = True
+#for i in range(m):
+#    average_residence_times[i] = A.run(arrival_times=arrivalTimes,service_time_distribution=service_time_distribution, isVerbose=True)
 
-for i in range(m):
-    metrics = ThresholdSim.run(n, t, mean_inter_arrival_time, inter_arrival_times_distribution,
-                                        mean_service_time, service_times_distribution, isVerbose)
-    avg_measured_inter_arrival_times[i] = metrics[0]
-    avg_relay_node_residence_times[i] = metrics[1]
-    avg_server_queue_times[i] = metrics[2]
-    avg_measured_server_service_times[i] = metrics[3]
-    avg_server_residence_times[i] = metrics[4]
-    avg_end_to_end_times[i] = metrics[5]
+I_values = [500,1000]
+I_values.extend(list(range(2500,20000, 2500)))
+I_values.extend( list(range(20000,100000,10000)))
+I_values.extend( list(range(100000,1000000,100000)))
+I_values.extend( list(range(1000000,11000000,1000000)))
+for I in I_values:
+    # write headers
+    if write_headers:
+        f = open(resultspath,"w")
+        f.write("I_values,")
+        f.write("A avg end-to-end")
+        f.write("\n")
+        f.close()
+        write_headers = False
 
-if print_all_results:
-    print("metrics: ")
-    print("average measured inter arrival time: " + str(Sim_math_ops.average(avg_measured_inter_arrival_times)))
-    print("avg_relay_node_residence_times: " + str(Sim_math_ops.average(avg_relay_node_residence_times)))
-    print("avg_server_queue_times: " + str(Sim_math_ops.average(avg_server_queue_times)))
-    print("avg_measured_server_service_times: " + str(Sim_math_ops.average(avg_measured_server_service_times)))
-    print("avg_server_residence_times: " + str(Sim_math_ops.average(avg_server_residence_times)))
-print("avg_end_to_end_times: " + str(Sim_math_ops.average(avg_end_to_end_times)))
+    average_residence_times = m * [0]
+    # create the arrival times
+    for exp_num in range(m):
+        arrival_times = MultBarDistr.run("",max_experiment_time,I,slow_inter_arrival_time,fast_inter_arrival_time,arrival_times_distribution)
+
+        # perform experiment
+        average_residence_times[exp_num] = A.run(arrival_times=arrival_times,service_time_distribution=service_time_settings)
+
+    # calculate average end to end time for each NPIAC
+    avg_E = Sim_math_ops.average(average_residence_times)
+
+    #write results
+    f = open(resultspath, "a")
+    f.write(str(I)+",")
+    f.write(str(avg_E)+",")
+    f.write("\n")
+    f.close()
