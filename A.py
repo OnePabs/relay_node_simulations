@@ -99,7 +99,7 @@ service_times_filepath = "" #r"C:\Users\juanp\OneDrive\Documents\experiments\tem
 service_time_settings = ExponentialDistributionSettings(40,service_times_filepath)
 slow_inter_arrival_time = 100   # the low rate inter arrival time
 fast_inter_arrival_time = 50    # the high rate inter arrival time
-resultspath = r"C:\Users\juanpablocontreras\Documents\temp\res.txt"
+resultspath = r"M:\temp\res.txt"
 write_headers = True
 isVerbose = False
 
@@ -114,7 +114,7 @@ I_values.extend( list(range(20000,100000,10000)))
 I_values.extend( list(range(100000,1000000,100000)))
 I_values.extend( list(range(1000000,11000000,1000000)))
 for I in I_values:
-            # write headers
+    # write headers
     if write_headers:
         f = open(resultspath,"w")
         f.write("I_values,")
