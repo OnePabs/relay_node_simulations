@@ -21,13 +21,17 @@ class ThresholdSim:
             t,
             arrivals_distribution=Poisson(50),
             service_time_distribution=Exponential(40),
-            isVerbose=False,
+            write_to_file=False,
+            base_filepath="",
+            is_verbose=False
     ):
         # create arrival times
         if n % t != 0:
             n = n - n % t
             # print(n)
-        arrival_times = arrivals_distribution.create(n)
+        arrival_times = arrivals_distribution.create(n,
+                                                     write_to_file=write_to_file,
+                                                     filepath=base_filepath+"\\arrival_times.txt")
 
         # create the appropriate batches with their request indexes.
         # calculate the relay node exit time for each batch
@@ -66,7 +70,7 @@ class ThresholdSim:
                 # there is a queue when the batch arrives
                 batches[i][2] = batches[i - 1][4]  # batch starts its service time at the time the batch before it leaves the server
             batches[i][4] = batches[i][2] + batches[i][3]  # batch finishes its service time at the time it starts its service time + its service time
-        if isVerbose:
+        if is_verbose:
             print(batches)
 
 

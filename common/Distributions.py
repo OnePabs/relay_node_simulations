@@ -5,15 +5,16 @@ class Distribution:
     def __init__(self, name="GENERAL"):
         self.name = name
 
-    def create(self, data, writeToFile=False, filepath="", append=False):
-        if writeToFile:
-            Distribution.write_list_of_numbers(data, filepath, append)
-            return
+    def create(self, data, write_to_file=False, filepath="", append=False):
+        if write_to_file:
+            Distribution.write_list_of_numbers(list_of_numbers=data, filepath=filepath, append=append)
+            return data
         else:
             return data
 
     @staticmethod
-    def write_list_of_numbers(self, list_of_numbers, filepath, append=True):
+    def write_list_of_numbers(list_of_numbers, filepath, append=False):
+        print("Parent Distribution write_list_of_numbers filepath = " + filepath)
         f = ''
         if append:
             f = open(filepath, "a")
@@ -157,6 +158,6 @@ class MultipleBarsPoisson(Distribution):
                 data[i] = data[i-1] + Sim_math_ops.exp(self.low)
             else:
                 data[i] = data[i-1] + Sim_math_ops.exp(self.high)
-        return super().create(data, write_to_file, filepath, append)
+        return super().create(data=data, write_to_file=write_to_file, filepath=filepath, append=append)
 
 
