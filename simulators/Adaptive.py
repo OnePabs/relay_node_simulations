@@ -169,14 +169,14 @@ class Adaptive:
                 avg_server_residence_time, avg_end_to_end_time]
 
 
-I_values = list(range(2500,20000, 2500))
-I_values.extend( list(range(20000,100000,10000)))
-I_values.extend( list(range(100000,1000000,100000)))
-I_values.extend( list(range(1000000,11000000,1000000)))
+I_values = list(range(15000,100000, 10000))
+#I_values.extend( list(range(20000,100000,10000)))
+#I_values.extend( list(range(100000,1000000,100000)))
+#I_values.extend( list(range(1000000,11000000,1000000)))
 
 m = 10      # number of experiments per I value
 switch_ia_thrsh = 75
-NPIACs = [250,750]
+NPIACs = [3,5,10,50,100,500,1000]
 c_thrsh = 3
 arrival_times_filepath = "" #r"C:\Users\juanp\OneDrive\Documents\experiments\temp\temp.txt"
 service_times_filepath = "" #r"C:\Users\juanp\OneDrive\Documents\experiments\temp\temp2.txt"

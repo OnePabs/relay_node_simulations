@@ -1,4 +1,4 @@
-from Sim_math_ops import Sim_math_ops
+from common.Sim_math_ops import Sim_math_ops
 
 
 class Distribution:
