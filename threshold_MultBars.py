@@ -1,10 +1,11 @@
 from simulators.ThresholdSim import ThresholdSim
+from simulators.A import A
 from common.Distributions import *
 from common.Sim_math_ops import *
 import time
 
-m = 3          # number of experiments
-n = 1000     # number of requests per experiment
+m = 1          # number of experiments
+n = 1000000     # number of requests per experiment
 t = 3           # threshold number of requests before data transfer happens
 
 # arrivals parameters
@@ -17,9 +18,9 @@ mean_service_time = 40
 service_time_distribution = Exponential(mean_service_time)
 
 # results parameters
-results_path = r"C:\Users\juanp\OneDrive\Documents\experiments\temp\res-nthousand-m3.txt"
+results_path = r"C:\Users\juanp\OneDrive\Documents\experiments\temp\A-res-n1million-m10-test.txt"
 
-I_values = [500, 500, 500, 500, 500]
+I_values = [500, 5000, 50000, 500000]
 # I_values = [500, 1000]
 # I_values.extend(list(range(2500, 20000, 2500)))
 # I_values.extend(list(range(20000, 100000,10000)))
@@ -41,7 +42,8 @@ for I_value in I_values:
     arrival_times_distribution = MultipleBarsPoisson(high_value, low_value, I_value, load_factor)
     Es = []
     for i in range(m):
-        E = ThresholdSim.run(n, t, arrival_times_distribution, service_time_distribution)
+        #E = ThresholdSim.run(n, t, arrival_times_distribution, service_time_distribution)
+        E = A.run(n, arrival_times_distribution, service_time_distribution)
         Es.append(E)
     avg_E = Sim_math_ops.average(Es)
 

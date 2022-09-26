@@ -116,8 +116,8 @@ class MultipleBarsConstant(Distribution):
         self.n_per_cycle = n_per_cycle
         return
 
-    def create(self, num_cycles, write_to_file=False, filepath="", append=False):
-        n = self.n_per_cycle * num_cycles
+    def create(self, n, write_to_file=False, filepath="", append=False):
+        # n is the number of points to create
         data = n * [0]
         for i in range(n):
             if i%self.n_per_cycle < self.load_factor*self.n_per_cycle:
@@ -147,12 +147,12 @@ class MultipleBarsPoisson(Distribution):
         self.n_per_cycle = n_per_cycle
         return
 
-    def create(self, num_cycles, write_to_file=False, filepath="", append=False):
-        n = self.n_per_cycle * num_cycles
+    def create(self, n, write_to_file=False, filepath="", append=False):
+        # n is the number of points to create
         data = n * [0]
+        comp = int(round(self.load_factor * self.n_per_cycle))
         for i in range(1, n):
-            if i % self.n_per_cycle < (self.load_factor * self.n_per_cycle - 0.5):
-                # 0.5 is subtracted to avoid erroneous float comparison
+            if i % self.n_per_cycle < comp:
                 # use low value
                 data[i] = data[i-1] + Sim_math_ops.exp(self.low)
             else:
