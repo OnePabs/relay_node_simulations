@@ -14,7 +14,7 @@ class Distribution:
 
     @staticmethod
     def write_list_of_numbers(list_of_numbers, filepath, append=False):
-        print("Parent Distribution write_list_of_numbers filepath = " + filepath)
+        #print("Parent Distribution write_list_of_numbers filepath = " + filepath)
         f = ''
         if append:
             f = open(filepath, "a")
@@ -100,21 +100,23 @@ class Poisson(Distribution):
 
 class MultipleBarsConstant(Distribution):
     # __--__--__--__--
-    def __init__(self, high, low, n_per_cycle, load_factor):
+    def __init__(self, first_part_intervals, second_part_intervals, n_per_cycle, load_factor):
         # high: the value of the inter arrival times for the high bar
-        # low: the value of the inter arrival times for the low bar
+        # first_part_intervals: the value of the intervals for the first part until n_per_cycle*load_factor
+        # second_part_ia: the value of the intervals for the second part from n_per_cycle*load_factor to n_per_cycle
         # nPerCycle: the number of points in one cycle. where one cycle is one repeating pattern of bars i.e __--
         # load_factor: the fraction of number of points at low value and all points in one cycle. = n_low/(n_low+n_high)
-        self.high = high
-        self.low = low
+        self.first_part_intervals = first_part_intervals
+        self.second_part_intervals = second_part_intervals
         self.n_per_cycle = n_per_cycle
         self.load_factor = load_factor
         return
 
-    def change_settings(self, high, low, n_per_cycle):
-        self.high = high
-        self.low = low
+    def change_settings(self, first_part_intervals, second_part_intervals, n_per_cycle, load_factor):
+        self.first_part_intervals = first_part_intervals
+        self.second_part_intervals = second_part_intervals
         self.n_per_cycle = n_per_cycle
+        self.load_factor = load_factor
         return
 
     def create(self, n, write_to_file=False, filepath="", append=False):
@@ -123,29 +125,65 @@ class MultipleBarsConstant(Distribution):
         for i in range(n):
             if i%self.n_per_cycle < self.load_factor*self.n_per_cycle:
                 # use low value
-                data[i] = self.low
+                data[i] = self.first_part_intervals
             else:
-                data[i] = self.high
+                data[i] = self.second_part_intervals
         return super().create(data, write_to_file, filepath, append)
 
 
-class MultipleBarsPoisson(Distribution):
-    # __--__--__--__--
-    def __init__(self, high, low, n_per_cycle, load_factor):
+class MultipleBarsExponential(Distribution):
+    def __init__(self, first_part_intervals, second_part_intervals, n_per_cycle, load_factor):
         # high: the value of the inter arrival times for the high bar
-        # low: the value of the inter arrival times for the low bar
+        # first_part_intervals: the value of the intervals for the first part until n_per_cycle*load_factor
+        # second_part_ia: the value of the intervals for the second part from n_per_cycle*load_factor to n_per_cycle
         # nPerCycle: the number of points in one cycle. where one cycle is one repeating pattern of bars i.e __--
         # load_factor: the fraction of number of points at low value and all points in one cycle. = n_low/(n_low+n_high)
-        self.high = high
-        self.low = low
+        self.first_part_intervals = first_part_intervals
+        self.second_part_intervals = second_part_intervals
         self.n_per_cycle = n_per_cycle
         self.load_factor = load_factor
         return
 
-    def change_settings(self, high, low, n_per_cycle):
-        self.high = high
-        self.low = low
+    def change_settings(self, first_part_intervals, second_part_intervals, n_per_cycle, load_factor):
+        self.first_part_intervals = first_part_intervals
+        self.second_part_intervals = second_part_intervals
         self.n_per_cycle = n_per_cycle
+        self.load_factor = load_factor
+        return
+
+    def create(self, n, write_to_file=False, filepath="", append=False):
+        # n is the number of points to create
+        data = n * [0]
+        comp = int(round(self.load_factor * self.n_per_cycle))
+        for i in range(n):
+            if i % self.n_per_cycle < comp:
+                # use low value
+                data[i] = Sim_math_ops.exp(self.first_part_intervals)
+            else:
+                data[i] = Sim_math_ops.exp(self.second_part_intervals)
+        return super().create(data=data, write_to_file=write_to_file, filepath=filepath, append=append)
+
+
+
+class MultipleBarsPoisson(Distribution):
+    # __--__--__--__--
+    def __init__(self, first_part_intervals, second_part_intervals, n_per_cycle, load_factor):
+        # high: the value of the inter arrival times for the high bar
+        # first_part_intervals: the value of the intervals for the first part until n_per_cycle*load_factor
+        # second_part_ia: the value of the intervals for the second part from n_per_cycle*load_factor to n_per_cycle
+        # nPerCycle: the number of points in one cycle. where one cycle is one repeating pattern of bars i.e __--
+        # load_factor: the fraction of number of points at low value and all points in one cycle. = n_low/(n_low+n_high)
+        self.first_part_intervals = first_part_intervals
+        self.second_part_intervals = second_part_intervals
+        self.n_per_cycle = n_per_cycle
+        self.load_factor = load_factor
+        return
+
+    def change_settings(self, first_part_intervals, second_part_intervals, n_per_cycle, load_factor):
+        self.first_part_intervals = first_part_intervals
+        self.second_part_intervals = second_part_intervals
+        self.n_per_cycle = n_per_cycle
+        self.load_factor = load_factor
         return
 
     def create(self, n, write_to_file=False, filepath="", append=False):
@@ -155,9 +193,11 @@ class MultipleBarsPoisson(Distribution):
         for i in range(1, n):
             if i % self.n_per_cycle < comp:
                 # use low value
-                data[i] = data[i-1] + Sim_math_ops.exp(self.low)
+                data[i] = data[i-1] + Sim_math_ops.exp(self.first_part_intervals)
             else:
-                data[i] = data[i-1] + Sim_math_ops.exp(self.high)
+                data[i] = data[i-1] + Sim_math_ops.exp(self.second_part_intervals)
         return super().create(data=data, write_to_file=write_to_file, filepath=filepath, append=append)
+
+
 
 

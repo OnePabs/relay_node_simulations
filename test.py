@@ -41,21 +41,6 @@ from simulators.A import A
 # a = A.run(10000)
 # print(a)
 
-path = r"C:\Users\juanp\OneDrive\Documents\experiments\temp\50000\arrival_times.txt"
-f = open(path)
-arrivals_str = f.readlines()
-f.close()
-
-num_points = len(arrivals_str)
-arrivals = num_points*[0]
-for i in range(num_points):
-    arrivals[i] = float(arrivals_str[i])
-
-x_points = range(num_points)
-plt.scatter(x_points, arrivals)
-plt.show()
-
-
 
 
 
