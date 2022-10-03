@@ -23,3 +23,16 @@ class Sim_math_ops:
         for i in range(1, len(lst)):
             lst2[i - 1] = lst[i] - lst[i - 1]
         return Sim_math_ops.average(lst2)
+
+    @staticmethod
+    def get_inter_arrival_times(arrival_times):
+        arrival_times_len = len(arrival_times)
+        if arrival_times_len < 2:
+            print("ERROR: less than 2 items. cannot compute inter arrival times")
+            exit()
+        inter_arrival_times =  (len(arrival_times)-1)*[0]
+        for i in range(1, arrival_times_len):
+            inter_arrival_times[i-1] = arrival_times[i] - arrival_times[i-1]
+        return inter_arrival_times
+
+

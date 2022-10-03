@@ -11,6 +11,7 @@ EPOCHS = 10
 # Load data
 inputs_path = r"C:\Users\juanp\OneDrive\Documents\experiments\predictive-training\inputs_test.csv"
 labels_path = r"C:\Users\juanp\OneDrive\Documents\experiments\predictive-training\labels_test.csv"
+save_model_path = r"C:\Users\juanp\OneDrive\Documents\experiments\predictive_models\predictive_nn"
 
 input_data = np.genfromtxt(inputs_path, delimiter=',')
 labels_data = np.genfromtxt(labels_path, delimiter=',')
@@ -54,7 +55,6 @@ history = model.fit(X_train, y_train, batch_size=8, epochs=10, validation_data=(
 print(history.history)
 
 # save the model
-save_model_path = r"C:\Users\juanp\OneDrive\Documents\experiments\predictive_models\predictive_nn"
 model.save(save_model_path)
 
 # Evaluate model on Test data

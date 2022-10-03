@@ -45,7 +45,7 @@ class Constant(Distribution):
 
 
 class ConstantRunningTotal(Distribution):
-    def __init__(self, constant,start_point=0):
+    def __init__(self, constant, start_point=0):
         Distribution("CONSTANTRUNNING")
         self.constant = constant
         self.start_point = start_point

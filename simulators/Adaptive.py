@@ -118,7 +118,7 @@ class Adaptive:
         batch_server_exit_times = (len(service_times))*[0]
         batch_server_service_start_time = (len(service_times))*[0]
         batch_server_exit_times[0] = relay_node_exit_batches[0][-1] + service_times[0]
-        for i in range(1,len(service_times)):
+        for i in range(1, len(service_times)):
             if relay_node_exit_batches[i][-1] < batch_server_exit_times[i-1]:       #batch arrived before previous batched finished processing
                 batch_server_exit_times[i] = batch_server_exit_times[i-1] + service_times[i] #batch starts processing when previous batch finishes, and takes service_times[i] to finish
                 batch_server_service_start_time[i] = batch_server_exit_times[i-1]
@@ -169,61 +169,61 @@ class Adaptive:
                 avg_server_residence_time, avg_end_to_end_time]
 
 
-I_values = list(range(15000,100000, 10000))
-#I_values.extend( list(range(20000,100000,10000)))
-#I_values.extend( list(range(100000,1000000,100000)))
-#I_values.extend( list(range(1000000,11000000,1000000)))
-
-m = 10      # number of experiments per I value
-switch_ia_thrsh = 75
-NPIACs = [3,5,10,50,100,500,1000]
-c_thrsh = 3
-arrival_times_filepath = "" #r"C:\Users\juanp\OneDrive\Documents\experiments\temp\temp.txt"
-service_times_filepath = "" #r"C:\Users\juanp\OneDrive\Documents\experiments\temp\temp2.txt"
-#service_time_settings = ConstantDistributionSettings(40,service_times_filepath)
-service_time_settings = ExponentialDistributionSettings(40,service_times_filepath)
-slow_inter_arrival_time = 100   # the low rate inter arrival time
-fast_inter_arrival_time = 50    # the high rate inter arrival time
-# arrival_times_distribution = "EXPONENTIAL"
-arrival_times_distribution = "POISSON"
-# arrival_times_distribution = "CONSTANT"
-# arrival_times_distribution = "CONSTANT_RUNNING_TOTAL"
-max_experiment_time = 5400000
-resultspath = r"C:\Users\juanp\OneDrive\Documents\experiments\temp\res.txt"
-write_headers = True
-isVerbose = False
-
-for I in I_values:
-    E_sums = len(NPIACs) * [0]   # running sum of the E for each NPIAC
-    E_avg = len(NPIACs) * [0]    # average E of each NPIAC over the m experiments performed
-
-    # create the arrival times
-    for exp_num in range(m):
-        arrival_times = MultBarDistr.run(arrival_times_filepath,max_experiment_time,I,slow_inter_arrival_time,fast_inter_arrival_time,arrival_times_distribution)
-
-        # write headers
-        if write_headers:
-            f = open(resultspath,"w")
-            f.write("I_values,")
-            for NPIAC in NPIACs:
-                f.write("NPIAC="+str(NPIAC)+",")
-            f.write("\n")
-            f.close()
-            write_headers = False
-
-        # perform experiment
-        for i in range(len(NPIACs)):
-            metrics = Adaptive.run(switch_ia_thrsh, NPIACs[i], c_thrsh, arrival_times_filepath,service_time_settings,arrival_times,isVerbose)
-            E_sums[i] += metrics[5] # metrics[5] is avg end to end time
-
-    # calculate average end to end time for each NPIAC
-    for i in range(len(E_sums)):
-        E_avg[i] = E_sums[i]/m
-
-    #write results
-    f = open(resultspath, "a")
-    f.write(str(I)+",")
-    for e in E_avg:
-        f.write(str(e) + ",")
-    f.write("\n")
-    f.close()
+# I_values = list(range(15000,100000, 10000))
+# #I_values.extend( list(range(20000,100000,10000)))
+# #I_values.extend( list(range(100000,1000000,100000)))
+# #I_values.extend( list(range(1000000,11000000,1000000)))
+#
+# m = 10      # number of experiments per I value
+# switch_ia_thrsh = 75
+# NPIACs = [3,5,10,50,100,500,1000]
+# c_thrsh = 3
+# arrival_times_filepath = "" #r"C:\Users\juanp\OneDrive\Documents\experiments\temp\temp.txt"
+# service_times_filepath = "" #r"C:\Users\juanp\OneDrive\Documents\experiments\temp\temp2.txt"
+# #service_time_settings = ConstantDistributionSettings(40,service_times_filepath)
+# service_time_settings = ExponentialDistributionSettings(40,service_times_filepath)
+# slow_inter_arrival_time = 100   # the low rate inter arrival time
+# fast_inter_arrival_time = 50    # the high rate inter arrival time
+# # arrival_times_distribution = "EXPONENTIAL"
+# arrival_times_distribution = "POISSON"
+# # arrival_times_distribution = "CONSTANT"
+# # arrival_times_distribution = "CONSTANT_RUNNING_TOTAL"
+# max_experiment_time = 5400000
+# resultspath = r"C:\Users\juanp\OneDrive\Documents\experiments\temp\res.txt"
+# write_headers = True
+# isVerbose = False
+#
+# for I in I_values:
+#     E_sums = len(NPIACs) * [0]   # running sum of the E for each NPIAC
+#     E_avg = len(NPIACs) * [0]    # average E of each NPIAC over the m experiments performed
+#
+#     # create the arrival times
+#     for exp_num in range(m):
+#         arrival_times = MultBarDistr.run(arrival_times_filepath,max_experiment_time,I,slow_inter_arrival_time,fast_inter_arrival_time,arrival_times_distribution)
+#
+#         # write headers
+#         if write_headers:
+#             f = open(resultspath,"w")
+#             f.write("I_values,")
+#             for NPIAC in NPIACs:
+#                 f.write("NPIAC="+str(NPIAC)+",")
+#             f.write("\n")
+#             f.close()
+#             write_headers = False
+#
+#         # perform experiment
+#         for i in range(len(NPIACs)):
+#             metrics = Adaptive.run(switch_ia_thrsh, NPIACs[i], c_thrsh, arrival_times_filepath,service_time_settings,arrival_times,isVerbose)
+#             E_sums[i] += metrics[5] # metrics[5] is avg end to end time
+#
+#     # calculate average end to end time for each NPIAC
+#     for i in range(len(E_sums)):
+#         E_avg[i] = E_sums[i]/m
+#
+#     #write results
+#     f = open(resultspath, "a")
+#     f.write(str(I)+",")
+#     for e in E_avg:
+#         f.write(str(e) + ",")
+#     f.write("\n")
+#     f.close()
