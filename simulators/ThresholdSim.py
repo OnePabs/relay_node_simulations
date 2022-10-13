@@ -2,19 +2,9 @@ from common.Sim_math_ops import Sim_math_ops
 from common.Distributions import *
 import time
 
-class ThresholdSim:
-    ###
-    # n = number of requests to simulate
-    # t = after t requests have been buffered, a data transfer takes place
-    # avg_service_time = average service time at the server (not at the relay node)
-    # avg_inter_arrival_time = average inter arrival times at the relay node
-    # isVerbose = if true, then results are printed
 
-    # Returns:
-    # [0] avg_inter_arrival_time
-    # [1] avg_relay_node_residence_time
-    # [2] avg_server_queue_time
-    # [3] avg_server_residence_time
+class ThresholdSim:
+
     @staticmethod
     def run(
             n,
