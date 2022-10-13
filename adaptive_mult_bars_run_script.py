@@ -1,25 +1,27 @@
-from simulators.Predictive import *
+from simulators.Adaptive import *
 import time
 
 
 is_verbose = False
 
-# model parameters
-# saved_model_path = r"C:\Users\juanp\OneDrive\Documents\experiments\predictive_models\constant"
-saved_model_path = r"C:\Users\juanp\OneDrive\Documents\experiments\predictive_models\exponential"
+
 
 # Experiment Parameters
-m = 10           # number of experiments
-n = 100000     # number of requests per experiment
-t = 3           # threshold number of requests before data transfer happens
+m = 10              # number of experiments
+n = 100000          # number of requests per experiment
+t = 3               # threshold number of requests before data transfer happens
+
+# technique parameters
+nprc = 51
+tac = 75
 
 
 # arrivals parameters
 # high_values = [330, 200, 143, 100, 77, 50]  # high ia values (low rate) experiment
-high_values = [100]   # default high value
+high_values = [100]   # default high inter arrival time (low rate)
 
 low_values = [67] #[77, 50, 47, 45, 44]   # low ia values (high rate) experiment
-# low_values = [50]   # default load factor
+# low_values = [50]   # default low ia value (high rate)
 
 # load_factors = [0, 0.25, 0.5, 0.75, 1]  # load factor experiment
 load_factors = [0.5]  # default load factor
@@ -30,10 +32,11 @@ mean_service_time = 40
 service_time_distribution = Exponential(mean_service_time)
 
 # results parameters
-results_path = r"C:\Users\juanp\OneDrive\Documents\experiments\temp\mult-bars-poisson\high_rate_experiments\predictive\m10-n100thous-t3-1.txt"
+results_path = r"C:\Users\juanp\OneDrive\Documents\experiments\temp\mult-bars-poisson\high_rate_experiments\adaptive\m10-n100thous-t3-nprc51.txt"
 
 
 # Load Factor Experiment
+# default I_value = n, for an even n greater than nprc
 I_values = [100000]
 
 # I values experiment
@@ -58,16 +61,19 @@ for I_value in I_values:
     for load_factor in load_factors:
         print("working on load factor: " + str(load_factor))
         for high_value in high_values:
+            print("working on high inter arrival time (low rate): " + str(high_value))
             for low_value in low_values:
+                print("working on low inter arrival time (high rate): " + str(high_value))
                 start_time = time.time()
                 arrival_times_distribution = MultipleBarsPoisson(high_value, low_value, I_value, load_factor)
                 Es = []
                 for i in range(m):
-                    E = Predictive.run(n=n,
-                                       t=t,
-                                       model_filepath=saved_model_path,
-                                       arrivals_distribution=arrival_times_distribution,
-                                       service_time_distribution=service_time_distribution)
+                    E = Adaptive.run(n=n,
+                                     tac=tac,
+                                     NPRC=nprc,
+                                     c_thrsh=t,
+                                     arrivals_distribution=arrival_times_distribution,
+                                     service_time_distribution=service_time_distribution)
                     Es.append(E)
                 avg_E = Sim_math_ops.average(Es)
 

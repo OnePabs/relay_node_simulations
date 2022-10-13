@@ -1,44 +1,37 @@
 # Adaptive
 # the adaptive technique is used by the relay node to switch between techniques A and C depending on the relay node request arrival rate
 
-from Sim_math_ops import Sim_math_ops
-from DistributionCreator import DistributionCreator
-from ServiceTimeSettings import *
-from MultBarDistr import MultBarDistr
+from common.Distributions import *
 
 class Adaptive:
 
 
     # Returns:
-    # [0] avg_inter_arrival_time
-    # [1] avg_relay_node_residence_time
-    # [2] avg_server_queue_time
-    # [3] avg_server_residence_time
+    # E (average end to end time)
     @staticmethod
     def run(
-            switch_ia_thrsh,                # inter arrival time at witch the adaptive technique switches from using technique A to Technique C and vice versa
-            NPIAC,                          # number of requests considered in order to take the decision to change technique or keep using the same technique
-            c_thrsh,                        # When technique C is used, c_thrsh is the number of requests buffered at the relay node until a data transfer happen
-            arrival_times_filepath,
-            service_time_settings,          # one of the classes in ServiceTimeSettings file
-            arrival_times=[],
+            n,                                          # number of requests to be created
+            tac,                                        # threshold inter arrival time at witch the adaptive technique switches from using technique A to Technique C and vice versa
+            NPRC,                                       # number of requests considered in order to take the decision to change technique or keep using the same technique
+            c_thrsh,                                    # When technique C is used, c_thrsh is the maximum number of requests buffered at the relay node after which a data transfer happens
+            arrivals_distribution=Poisson(50),          # The distribution of the request arrival times
+            service_time_distribution=Exponential(40),  # The distribution of the request service times
             isVerbose=False
     ):
 
-        if arrival_times_filepath:
-            arrival_times = DistributionCreator.read(arrival_times_filepath)
+        # create arrival times
+        arrival_times = arrivals_distribution.create(n)
         #print(arrival_times)
 
         #calculate the average inter arrival time of the last NPRC requests for each new arrival
         ia_avgs = (len(arrival_times))*[0]
-        for i in range(1,len(arrival_times)):
-            if i > NPIAC:
-                elapsed_time = arrival_times[i] - arrival_times[i-NPIAC]
-                ia_avgs[i] = elapsed_time/NPIAC
+        for i in range(1, len(arrival_times)):
+            if i > NPRC:
+                elapsed_time = arrival_times[i] - arrival_times[i - NPRC]
+                ia_avgs[i] = elapsed_time / NPRC
             else:
                 elapsed_time = arrival_times[i] - arrival_times[0]
                 ia_avgs[i] = elapsed_time/i
-
         #print(ia_avgs)
 
         # calculate the time of leaving the relay node based on the arrival time and the technique used
@@ -49,7 +42,7 @@ class Adaptive:
         curr_technique_used = "a"
         curr_batch = []
         for i in range(1,len(arrival_times)):
-            if ia_avgs[i] < switch_ia_thrsh:
+            if ia_avgs[i] < tac:
                 # use technique C
                 if len(curr_batch) < c_thrsh:
                     curr_batch.append(arrival_times[i])
@@ -85,33 +78,18 @@ class Adaptive:
 
 
         # calculate the relay node residence time for each request
-        curr_idx = 0
-        relay_node_res_times = len(arrival_times)*[0]
-        for batch in relay_node_exit_batches:
-            last_time_in_batch = batch[-1]
-            for req_time in batch:
-                relay_node_res_times[curr_idx] = last_time_in_batch - arrival_times[curr_idx]
-                curr_idx += 1
-
-        #print(relay_node_res_times)
+        # curr_idx = 0
+        # relay_node_res_times = len(arrival_times)*[0]
+        # for batch in relay_node_exit_batches:
+        #     last_time_in_batch = batch[-1]
+        #     for req_time in batch:
+        #         relay_node_res_times[curr_idx] = last_time_in_batch - arrival_times[curr_idx]
+        #         curr_idx += 1
+        # print(relay_node_res_times)
 
         # create the service times for each batch
-        service_times = []
-        if isinstance(service_time_settings,ConstantDistributionSettings):
-            if service_time_settings.filepath:
-                DistributionCreator.constant(len(relay_node_exit_batches),service_time_settings.const,service_time_settings.filepath,False)
-                service_times = DistributionCreator.read(service_time_settings.filepath)
-            else:
-                service_times = DistributionCreator.constant(len(relay_node_exit_batches),service_time_settings.const,service_time_settings.filepath,False)
-        elif isinstance(service_time_settings,ExponentialDistributionSettings):
-            if service_time_settings.filepath:
-                DistributionCreator.exponential(len(relay_node_exit_batches), service_time_settings.mean,service_time_settings.filepath, False)
-                service_times = DistributionCreator.read(service_time_settings.filepath)
-            else:
-                service_times = DistributionCreator.exponential(len(relay_node_exit_batches), service_time_settings.mean,service_time_settings.filepath, False)
-        else:
-            raise Exception('Service Time Distribution', 'Not Found')
-
+        num_batches = len(relay_node_exit_batches)
+        service_times = service_time_distribution.create(num_batches)
         #print(service_times)
 
         # calculate the time of leaving the server for each request
@@ -139,17 +117,17 @@ class Adaptive:
         #print(requests_server_exit_times)
 
         # calculate server queue times
-        server_queue_times = (len(arrival_times))*[0]
-        curr_idx = 0
-        for batch_idx in range(len(batch_server_service_start_time)):
-            for relay_exit_time in relay_node_exit_batches[batch_idx]:
-                server_queue_times[curr_idx] = batch_server_service_start_time[batch_idx] - relay_node_exit_batches[batch_idx][-1]
-                curr_idx += 1
+        # server_queue_times = (len(arrival_times))*[0]
+        # curr_idx = 0
+        # for batch_idx in range(len(batch_server_service_start_time)):
+        #     for relay_exit_time in relay_node_exit_batches[batch_idx]:
+        #         server_queue_times[curr_idx] = batch_server_service_start_time[batch_idx] - relay_node_exit_batches[batch_idx][-1]
+        #         curr_idx += 1
 
         # calculate server residence times
-        server_residence_times = (len(arrival_times)) * [0]
-        for i in range(len(arrival_times)):
-            server_residence_times[i] = requests_server_exit_times[i] - relay_exit_times[i]
+        # server_residence_times = (len(arrival_times)) * [0]
+        # for i in range(len(arrival_times)):
+        #     server_residence_times[i] = requests_server_exit_times[i] - relay_exit_times[i]
 
 
         # calculate end to end times
@@ -158,15 +136,16 @@ class Adaptive:
             end_to_end_times[i] = requests_server_exit_times[i] - arrival_times[i]
 
         # calculate metrics
-        avg_inter_arrival_time = Sim_math_ops.avg_inter_arrival(arrival_times)
-        avg_relay_node_residence_time = Sim_math_ops.average(relay_node_res_times)
-        avg_server_queue_time = Sim_math_ops.average(server_queue_times)
-        avg_server_service_time = Sim_math_ops.average(service_times)
-        avg_server_residence_time = Sim_math_ops.average(server_residence_times)
+        # avg_inter_arrival_time = Sim_math_ops.avg_inter_arrival(arrival_times)
+        # avg_relay_node_residence_time = Sim_math_ops.average(relay_node_res_times)
+        # avg_server_queue_time = Sim_math_ops.average(server_queue_times)
+        # avg_server_service_time = Sim_math_ops.average(service_times)
+        # avg_server_residence_time = Sim_math_ops.average(server_residence_times)
         avg_end_to_end_time = Sim_math_ops.average(end_to_end_times)
 
-        return [avg_inter_arrival_time, avg_relay_node_residence_time, avg_server_queue_time, avg_server_service_time,
-                avg_server_residence_time, avg_end_to_end_time]
+        # return [avg_inter_arrival_time, avg_relay_node_residence_time, avg_server_queue_time, avg_server_service_time,
+        #         avg_server_residence_time, avg_end_to_end_time]
+        return avg_end_to_end_time
 
 
 # I_values = list(range(15000,100000, 10000))

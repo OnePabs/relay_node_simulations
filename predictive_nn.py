@@ -5,13 +5,13 @@ from keras.utils import to_categorical
 from keras.utils.vis_utils import model_to_dot
 from sklearn.model_selection import train_test_split
 
-BATCH_SIZE = 100
-EPOCHS = 10
+BATCH_SIZE = 1024
+EPOCHS = 100
 
 # Load data
-inputs_path = r"C:\Users\juanp\OneDrive\Documents\experiments\predictive-training\inputs_test.csv"
-labels_path = r"C:\Users\juanp\OneDrive\Documents\experiments\predictive-training\labels_test.csv"
-save_model_path = r"C:\Users\juanp\OneDrive\Documents\experiments\predictive_models\predictive_nn"
+inputs_path = r"C:\Users\juanp\OneDrive\Documents\experiments\predictive-training\exp-inputs.csv"
+labels_path = r"C:\Users\juanp\OneDrive\Documents\experiments\predictive-training\exp-labels.csv"
+save_model_path = r"C:\Users\juanp\OneDrive\Documents\experiments\predictive_models\exponential"
 
 input_data = np.genfromtxt(inputs_path, delimiter=',')
 labels_data = np.genfromtxt(labels_path, delimiter=',')
@@ -39,7 +39,7 @@ print("Y y_valid shape: " + str(y_valid.shape))
 
 # create and specify the structure of the model
 model = models.Sequential()
-model.add(keras.layers.Dense(128, input_shape=(5,)))      # batches of 8. innput data of size (num_points,5)
+model.add(keras.layers.Dense(BATCH_SIZE, input_shape=(5,)))      # batches of 128. input data of size (num_points,5)
 model.add(keras.layers.Dense(32, activation='relu'))
 model.add(keras.layers.Dense(32, activation='relu'))
 model.add(keras.layers.Dense(32, activation='relu'))
@@ -51,15 +51,15 @@ model.compile(optimizer='Adam', loss='binary_crossentropy', metrics=["accuracy"]
 
 #train the model
 print()
-history = model.fit(X_train, y_train, batch_size=8, epochs=10, validation_data=(X_valid, y_valid))
-print(history.history)
+history = model.fit(X_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCHS, validation_data=(X_valid, y_valid))
+# print(history.history)
 
 # save the model
 model.save(save_model_path)
 
 # Evaluate model on Test data
 print()
-results = model.evaluate(X_test, y_test, batch_size=8)
+results = model.evaluate(X_test, y_test, batch_size=BATCH_SIZE)
 print('test loss, test acc:', results)
 
 # predict one value
