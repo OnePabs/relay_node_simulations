@@ -48,7 +48,15 @@ class A:
             print("average measured queue time: " + str(average_queue_time))
             print("average measured residence time: " + str(average_residence_time))
 
-        return average_residence_time
+        return_object = {
+            'ia_buff': measured_avg_inter_arrival_time,
+            'st_storage': measured_avg_service_time,
+            'res_buff': 0,
+            'res_sm': average_residence_time,
+            'E': average_residence_time
+        }
+        return return_object
+
 
 
 # # Script

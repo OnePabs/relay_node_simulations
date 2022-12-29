@@ -1,0 +1,2 @@
+Load Factor, I_value, high_ia, low_ia, mean service time, Average E (milliseconds), e1, e2, e3, e4, e5, e6, e7, e8, e9, e10
+0.5,60000,100,50,40,83.17984177839134,82.85046354019354,83.55012600110227,83.13893579387822,
