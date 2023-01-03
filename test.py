@@ -42,6 +42,14 @@ from simulators.A import A
 # print(a)
 
 
+from simulators.ThresholdSim import ThresholdSim
+
+results = ThresholdSim.run(3, 3, service_time_distribution=Constant(40))
+print("Mean buff res time: " + str(results['res_buff']))
+print("Mean Storage Cloud res time: " + str(results['res_sm']))
+print("Mean E time: " + str(results['E']))
+
+
 
 
 

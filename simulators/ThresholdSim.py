@@ -1,4 +1,3 @@
-from common.Sim_math_ops import Sim_math_ops
 from common.Distributions import *
 import time
 
@@ -16,12 +15,16 @@ class ThresholdSim:
             is_verbose=False
     ):
         # create arrival times
-        if n % t != 0:
-            n = n - n % t
-            # print(n)
-        arrival_times = arrivals_distribution.create(n,
-                                                     write_to_file=write_to_file,
-                                                     filepath=base_filepath+"\\arrival_times.txt")
+        # if n % t != 0:
+        #     n = n - n % t
+        #     # print(n)
+        # arrival_times = arrivals_distribution.create(n,
+        #                                              write_to_file=write_to_file,
+        #                                              filepath=base_filepath+"\\arrival_times.txt")
+
+        # TEST
+        arrival_times = [10, 15, 20]
+        n = len(arrival_times)
 
         # create the appropriate batches with their request indexes.
         # calculate the relay node exit time for each batch
@@ -66,35 +69,45 @@ class ThresholdSim:
 
         start_calc_res_times = time.time()
         # calculate relay node residence times, server queue times, server residence times, and end to end times
-        #relay_node_residence_times = n * [0]
-        #server_queue_times = n * [0]
-        #server_service_times = n * [0]
-        #server_residence_times = n * [0]
+        relay_node_residence_times = n * [0]
+        server_queue_times = n * [0]
+        server_service_times = n * [0]
+        server_residence_times = n * [0]
         end_to_end_times = n * [0]
         for i in range(len(batches)):
             for j in batches[i][0]:
                 # request relay node residence time is the batch relay node exit time - the request arrival time
-                #relay_node_residence_times[j] = batches[i][1] - arrival_times[j]
-                # batch server service entry time - batch relay node exit time
-                #server_queue_times[j] = batches[i][2] - batches[i][1]
+                relay_node_residence_times[j] = batches[i][1] - arrival_times[j]
+                #batch server service entry time - batch relay node exit time
+                server_queue_times[j] = batches[i][2] - batches[i][1]
                 # batch server service exit time - batch server service entry time
-                #server_service_times[j] = batches[i][4] - batches[i][2]
+                server_service_times[j] = batches[i][4] - batches[i][2]
                 # batch server service exit time - batch relay node exit time
-                #server_residence_times[j] = batches[i][4] - batches[i][1]
+                server_residence_times[j] = batches[i][4] - batches[i][1]
                 end_to_end_times[j] = batches[i][4] - arrival_times[j]
 
 
         # calculate metrics
-        # avg_inter_arrival_time = Sim_math_ops.avg_inter_arrival(arrival_times)
-        # avg_relay_node_residence_time = Sim_math_ops.average(relay_node_residence_times)
-        # avg_server_queue_time = Sim_math_ops.average(server_queue_times)
-        # avg_server_service_time = Sim_math_ops.average(server_service_times)
-        # avg_server_residence_time = Sim_math_ops.average(server_residence_times)
+        avg_inter_arrival_time = Sim_math_ops.avg_inter_arrival(arrival_times)
+        avg_relay_node_residence_time = Sim_math_ops.average(relay_node_residence_times)
+        avg_server_queue_time = Sim_math_ops.average(server_queue_times)
+        avg_server_service_time = Sim_math_ops.average(server_service_times)
+        avg_server_residence_time = Sim_math_ops.average(server_residence_times)
         avg_end_to_end_time = Sim_math_ops.average(end_to_end_times)
+
+        # create dictionary
+        results = {
+            'ia_buff': avg_inter_arrival_time,
+            'st_storage': avg_server_service_time,
+            'qt_storage': avg_server_queue_time,
+            'res_buff': avg_relay_node_residence_time,
+            'res_sm': avg_server_residence_time,
+            'E': avg_end_to_end_time
+        }
 
         # return [avg_inter_arrival_time, avg_relay_node_residence_time, avg_server_queue_time, avg_server_service_time,
         #         avg_server_residence_time, avg_end_to_end_time]
-        return avg_end_to_end_time
+        return results
 
 
 
